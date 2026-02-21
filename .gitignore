@@ -1,0 +1,28 @@
+# WordPress core
+wp-config.php
+wp-content/uploads/
+wp-content/upgrade/
+wp-content/cache/
+wp-content/blogs.dir/
+
+# Docker and OS
+.DS_Store
+*.log
+docker-compose.override.yml
+.database_data/
+
+# Dependencies
+node_modules/
+vendor/
+
+# Local configuration
+.env
+
+# Gemini/Antigravity specific
+.gemini/
+.agents/
+.agent/
+_agents/
+_agent/
+AGENTS.md
+SKILLS/
