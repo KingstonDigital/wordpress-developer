@@ -1,15 +1,37 @@
-# WordPress core
+# WordPress core and standard folders
+/wp-admin/
+/wp-includes/
+/wp-content/themes/
+/wp-content/uploads/
+/wp-content/upgrade/
+/wp-content/cache/
+/wp-content/plugins/akismet/
+/wp-content/plugins/hello.php
 wp-config.php
-wp-content/uploads/
-wp-content/upgrade/
-wp-content/cache/
-wp-content/blogs.dir/
+index.php
+license.txt
+readme.html
+wp-activate.php
+wp-blog-header.php
+wp-comments-post.php
+wp-cron.php
+wp-links-opml.php
+wp-load.php
+wp-login.php
+wp-mail.php
+wp-settings.php
+wp-signup.php
+wp-trackback.php
+xmlrpc.php
+
+# Keep our custom plugin
+!/wp-content/plugins/kdm-landing-blocks/
 
 # Docker and OS
+.database_data/
 .DS_Store
 *.log
 docker-compose.override.yml
-.database_data/
 
 # Dependencies
 node_modules/
@@ -18,11 +40,18 @@ vendor/
 # Local configuration
 .env
 
-# Gemini/Antigravity specific
-.gemini/
-.agents/
-.agent/
-_agents/
-_agent/
-AGENTS.md
-SKILLS/
+# TRACK these (Explicitly allowed)
+!/SKILLS/
+!/AGENTS.md
+!/.agents/
+!/.agent/
+!/_agents/
+!/_agent/
+!/.gemini/antigravity/brain/
+!/workflows/
+!/task.md
+!/README.md
+!/Gutenberg-Blocks-Markup.html
+!/local-seo-toronto.html
+!/docker-compose.yml
+!/.gitignore
