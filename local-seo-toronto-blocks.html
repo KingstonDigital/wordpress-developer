@@ -1,38 +1,38 @@
-<!-- wp:group {"align":"full","className":"kdm-landing-pattern-wrapper","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70","left":"var:preset|spacing|50","right":"var:preset|spacing|50"}},"elements":{"link":{"color":{"text":"var:preset|color|white"}}}},"backgroundColor":"black","textColor":"white","layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull kdm-landing-pattern-wrapper has-white-color has-black-background-color has-text-color has-background has-link-color"
-    style="padding-top:var(--wp--preset--spacing--70);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--70);padding-left:var(--wp--preset--spacing--50)">
+<!-- wp:group {"align":"full","className":"kdm-landing-page","layout":{"type":"constrained","contentSize":"1200px"}} -->
+<div class="wp-block-group alignfull kdm-landing-page">
 
-    <!-- HERO SECTION -->
-    <!-- wp:group {"align":"full","className":"kdm-hero","style":{"spacing":{"padding":{"top":"80px","bottom":"80px","left":"60px","right":"60px"}}},"layout":{"type":"constrained"}} -->
-    <div class="wp-block-group alignfull kdm-hero"
+    <!-- HERO -->
+    <!-- wp:group {"align":"full","className":"kdm-lp-hero","style":{"spacing":{"padding":{"top":"80px","bottom":"80px","left":"60px","right":"60px"}}},"layout":{"type":"constrained"}} -->
+    <div class="wp-block-group alignfull kdm-lp-hero"
         style="padding-top:80px;padding-right:60px;padding-bottom:80px;padding-left:60px">
-        <!-- wp:columns {"verticalAlignment":"center"} -->
+        <!-- wp:columns {"verticalAlignment":"center","gap":"60px"} -->
         <div class="wp-block-columns are-vertically-aligned-center">
+
             <!-- wp:column {"verticalAlignment":"center","width":"60%"} -->
             <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:60%">
-                <!-- wp:paragraph {"className":"kdm-hero-eyebrow"} -->
-                <p class="kdm-hero-eyebrow">Local SEO Toronto</p>
+                <!-- wp:paragraph {"className":"kdm-lp-eyebrow"} -->
+                <p class="kdm-lp-eyebrow">Local SEO Toronto</p>
                 <!-- /wp:paragraph -->
 
-                <!-- wp:heading {"level":1,"className":"kdm-hero-title"} -->
-                <h1 class="wp-block-heading kdm-hero-title">Local <em>SEO</em><br>That Puts You<br>on the
+                <!-- wp:heading {"level":1,"className":"kdm-lp-title"} -->
+                <h1 class="wp-block-heading kdm-lp-title">Local <em>SEO</em><br>That Puts You<br>on the
                     <strong>Map</strong></h1>
                 <!-- /wp:heading -->
 
-                <!-- wp:paragraph {"className":"kdm-hero-desc"} -->
-                <p class="kdm-hero-desc">Stop losing customers to competitors who rank higher on Google Maps. We help
+                <!-- wp:paragraph {"className":"kdm-lp-desc"} -->
+                <p class="kdm-lp-desc">Stop losing customers to competitors who rank higher on Google Maps. We help
                     Toronto businesses dominate local search — from Downtown to East York — with strategies built around
                     how your customers actually search.</p>
                 <!-- /wp:paragraph -->
 
-                <!-- wp:buttons {"className":"kdm-hero-actions"} -->
-                <div class="wp-block-buttons kdm-hero-actions">
-                    <!-- wp:button {"className":"kdm-btn-primary"} -->
-                    <div class="wp-block-button kdm-btn-primary"><a class="wp-block-button__link wp-element-button"
+                <!-- wp:buttons -->
+                <div class="wp-block-buttons">
+                    <!-- wp:button {"className":"kdm-lp-btn-primary"} -->
+                    <div class="wp-block-button kdm-lp-btn-primary"><a class="wp-block-button__link wp-element-button"
                             href="#quote">Get My Local SEO Plan</a></div>
                     <!-- /wp:button -->
-                    <!-- wp:button {"className":"kdm-btn-outline"} -->
-                    <div class="wp-block-button kdm-btn-outline"><a class="wp-block-button__link wp-element-button"
+                    <!-- wp:button {"className":"kdm-lp-btn-outline"} -->
+                    <div class="wp-block-button kdm-lp-btn-outline"><a class="wp-block-button__link wp-element-button"
                             href="https://kingstondigital.ca/seo-services-for-toronto-businesses">← Back to SEO
                             Services</a></div>
                     <!-- /wp:button -->
@@ -44,85 +44,87 @@
             <!-- wp:column {"verticalAlignment":"center","width":"40%"} -->
             <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:40%">
                 <!-- wp:html -->
-                <div class="kdm-form-box">
+                <div class="kdm-lp-form-box">
                     <h3>Speak with a Local SEO Expert</h3>
                     <p>Free strategy call. No pressure, no obligations.</p>
                     <form>
-                        <div class="kdm-form-row">
-                            <div class="kdm-form-group"><label>First Name</label><input type="text"
+                        <div class="kdm-lp-form-row">
+                            <div class="kdm-lp-form-group"><label>First Name</label><input type="text"
                                     placeholder="Jane" /></div>
-                            <div class="kdm-form-group"><label>Last Name</label><input type="text"
+                            <div class="kdm-lp-form-group"><label>Last Name</label><input type="text"
                                     placeholder="Smith" /></div>
                         </div>
-                        <div class="kdm-form-row">
-                            <div class="kdm-form-group"><label>Email</label><input type="email"
+                        <div class="kdm-lp-form-row">
+                            <div class="kdm-lp-form-group"><label>Email</label><input type="email"
                                     placeholder="jane@company.com" /></div>
-                            <div class="kdm-form-group"><label>Phone</label><input type="tel"
+                            <div class="kdm-lp-form-group"><label>Phone</label><input type="tel"
                                     placeholder="416-555-0100" /></div>
                         </div>
-                        <div class="kdm-form-row">
-                            <div class="kdm-form-group kdm-form-full"><label>Message</label><textarea
+                        <div class="kdm-lp-form-row">
+                            <div class="kdm-lp-form-group kdm-lp-form-full"><label>Message</label><textarea
                                     placeholder="Tell us about your business and goals…"></textarea></div>
                         </div>
-                        <button type="submit" class="kdm-form-submit">Start Your Free Consultation →</button>
+                        <button type="submit" class="kdm-lp-form-submit">Start Your Free Consultation →</button>
                     </form>
                 </div>
                 <!-- /wp:html -->
             </div>
             <!-- /wp:column -->
+
         </div>
         <!-- /wp:columns -->
     </div>
     <!-- /wp:group -->
 
     <!-- INTRO BAND -->
-    <!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"72px","bottom":"72px"}}},"layout":{"type":"constrained","contentSize":"900px"}} -->
-    <div class="wp-block-group alignwide" style="padding-top:72px;padding-bottom:72px">
-        <!-- wp:paragraph {"align":"center","className":"kdm-section-label"} -->
-        <p class="has-text-align-center kdm-section-label">What Is Local SEO?</p>
+    <!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"80px","bottom":"80px"}}},"layout":{"type":"constrained","contentSize":"800px"}} -->
+    <div class="wp-block-group alignwide" style="padding-top:80px;padding-bottom:80px">
+        <!-- wp:paragraph {"align":"center","className":"kdm-lp-section-label"} -->
+        <p class="has-text-align-center kdm-lp-section-label">What Is Local SEO?</p>
         <!-- /wp:paragraph -->
 
-        <!-- wp:heading {"textAlign":"center","className":"kdm-intro-h2"} -->
-        <h2 class="wp-block-heading has-text-align-center kdm-intro-h2">Rank Where It <em>Matters</em> Most</h2>
+        <!-- wp:heading {"textAlign":"center","className":"kdm-lp-h2"} -->
+        <h2 class="wp-block-heading has-text-align-center kdm-lp-h2">Rank Where It <em>Matters</em> Most</h2>
         <!-- /wp:heading -->
 
-        <!-- wp:paragraph {"align":"center","className":"kdm-intro-p"} -->
-        <p class="has-text-align-center kdm-intro-p">Local SEO is the process of optimizing your online presence so
+        <!-- wp:paragraph {"align":"center","className":"kdm-lp-intro-p"} -->
+        <p class="has-text-align-center kdm-lp-intro-p">Local SEO is the process of optimizing your online presence so
             customers in your area find you first — on Google Maps, in the Local Pack, and across neighbourhood-specific
             searches. For Toronto businesses, it's the difference between a full calendar and an empty one.</p>
         <!-- /wp:paragraph -->
     </div>
     <!-- /wp:group -->
 
-    <!-- SERVICE 1: GBP -->
-    <!-- wp:group {"align":"full","className":"kdm-service-section kdm-service-alt","style":{"spacing":{"padding":{"top":"80px","bottom":"80px","left":"60px","right":"60px"}}},"layout":{"type":"constrained"}} -->
-    <div class="wp-block-group alignfull kdm-service-section kdm-service-alt"
+    <!-- SERVICE 1 -->
+    <!-- wp:group {"align":"full","className":"kdm-lp-section kdm-lp-section-alt","style":{"spacing":{"padding":{"top":"80px","bottom":"80px","left":"60px","right":"60px"}}},"layout":{"type":"constrained"}} -->
+    <div class="wp-block-group alignfull kdm-lp-section kdm-lp-section-alt"
         style="padding-top:80px;padding-right:60px;padding-bottom:80px;padding-left:60px">
         <!-- wp:columns {"verticalAlignment":"center","gap":"80px"} -->
         <div class="wp-block-columns are-vertically-aligned-center">
+
             <!-- wp:column {"verticalAlignment":"center"} -->
             <div class="wp-block-column is-vertically-aligned-center">
-                <!-- wp:paragraph {"className":"kdm-tag"} -->
-                <p class="kdm-tag">Service 01</p>
+                <!-- wp:paragraph {"className":"kdm-lp-tag"} -->
+                <p class="kdm-lp-tag">Service 01</p>
                 <!-- /wp:paragraph -->
 
-                <!-- wp:heading {"className":"kdm-service-h2"} -->
-                <h2 class="wp-block-heading kdm-service-h2">Google Business<br><em>Profile</em><br>Optimization</h2>
+                <!-- wp:heading {"className":"kdm-lp-service-h2"} -->
+                <h2 class="wp-block-heading kdm-lp-service-h2">Google Business<br><em>Profile</em><br>Optimization</h2>
                 <!-- /wp:heading -->
 
-                <!-- wp:paragraph {"className":"kdm-service-p"} -->
-                <p class="kdm-service-p">Your Google Business Profile is often the first thing a customer sees — and
+                <!-- wp:paragraph {"className":"kdm-lp-service-p"} -->
+                <p class="kdm-lp-service-p">Your Google Business Profile is often the first thing a customer sees — and
                     most businesses leave it half-finished. We fully optimize your GBP so it converts searchers into
                     calls, visits, and leads.</p>
                 <!-- /wp:paragraph -->
 
-                <!-- wp:paragraph {"className":"kdm-service-p"} -->
-                <p class="kdm-service-p">From categories and service areas to review strategy and Q&A, we handle every
-                    element that signals trust and relevance to Google's local algorithm.</p>
+                <!-- wp:paragraph {"className":"kdm-lp-service-p"} -->
+                <p class="kdm-lp-service-p">From categories and service areas to review strategy and Q&A, we handle
+                    every element that signals trust and relevance to Google's local algorithm.</p>
                 <!-- /wp:paragraph -->
 
-                <!-- wp:paragraph {"className":"kdm-cta-link"} -->
-                <p class="kdm-cta-link"><a href="#quote">Optimize My GBP &rarr;</a></p>
+                <!-- wp:paragraph {"className":"kdm-lp-link-more"} -->
+                <p class="kdm-lp-link-more"><a href="#quote">Optimize My GBP &rarr;</a></p>
                 <!-- /wp:paragraph -->
             </div>
             <!-- /wp:column -->
@@ -130,33 +132,33 @@
             <!-- wp:column {"verticalAlignment":"center"} -->
             <div class="wp-block-column is-vertically-aligned-center">
                 <!-- wp:html -->
-                <div class="kdm-mockup-card">
-                    <div class="kdm-mockup-header">
-                        <div class="kdm-dot kdm-dot-r"></div>
-                        <div class="kdm-dot kdm-dot-y"></div>
-                        <div class="kdm-dot kdm-dot-g"></div>
-                        <span class="kdm-mockup-title">GBP Performance Dashboard</span>
+                <div class="kdm-lp-mockup-card">
+                    <div class="kdm-lp-mockup-header">
+                        <div class="kdm-lp-dot kdm-lp-dot-r"></div>
+                        <div class="kdm-lp-dot kdm-lp-dot-y"></div>
+                        <div class="kdm-lp-dot kdm-lp-dot-g"></div>
+                        <span class="kdm-lp-mockup-title">GBP Performance Dashboard</span>
                     </div>
-                    <div class="kdm-mockup-body">
+                    <div class="kdm-lp-mockup-body">
                         <div class="kdm-gbp-score">
                             <div class="kdm-score-ring"><span>94</span></div>
                             <div class="kdm-score-info">
-                                <h4 style="margin: 0">Profile Strength</h4>
+                                <h4>Profile Strength</h4>
                                 <p>Fully optimized &amp; verified</p>
                             </div>
                         </div>
                         <div class="kdm-gbp-metrics">
                             <div class="kdm-gbp-metric">
-                                <div class="kdm-num">3.2K</div>
-                                <div class="kdm-lbl">Monthly Views</div>
+                                <div class="num">3.2K</div>
+                                <div class="lbl">Monthly Views</div>
                             </div>
                             <div class="kdm-gbp-metric">
-                                <div class="kdm-num">218</div>
-                                <div class="kdm-lbl">Direction Requests</div>
+                                <div class="num">218</div>
+                                <div class="lbl">Direction Requests</div>
                             </div>
                             <div class="kdm-gbp-metric">
-                                <div class="kdm-num">4.9★</div>
-                                <div class="kdm-lbl">Avg Rating</div>
+                                <div class="num">4.9★</div>
+                                <div class="lbl">Avg Rating</div>
                             </div>
                         </div>
                     </div>
@@ -164,14 +166,15 @@
                 <!-- /wp:html -->
             </div>
             <!-- /wp:column -->
+
         </div>
         <!-- /wp:columns -->
     </div>
     <!-- /wp:group -->
 
-    <!-- SERVICE 2: CITATIONS -->
-    <!-- wp:group {"align":"full","className":"kdm-service-section","style":{"spacing":{"padding":{"top":"80px","bottom":"80px","left":"60px","right":"60px"}}},"layout":{"type":"constrained"}} -->
-    <div class="wp-block-group alignfull kdm-service-section"
+    <!-- SERVICE 2 -->
+    <!-- wp:group {"align":"full","className":"kdm-lp-section","style":{"spacing":{"padding":{"top":"80px","bottom":"80px","left":"60px","right":"60px"}}},"layout":{"type":"constrained"}} -->
+    <div class="wp-block-group alignfull kdm-lp-section"
         style="padding-top:80px;padding-right:60px;padding-bottom:80px;padding-left:60px">
         <!-- wp:columns {"verticalAlignment":"center","gap":"80px"} -->
         <div class="wp-block-columns are-vertically-aligned-center">
@@ -179,30 +182,30 @@
             <!-- wp:column {"verticalAlignment":"center"} -->
             <div class="wp-block-column is-vertically-aligned-center">
                 <!-- wp:html -->
-                <div class="kdm-mockup-card">
-                    <div class="kdm-mockup-header">
-                        <div class="kdm-dot kdm-dot-r"></div>
-                        <div class="kdm-dot kdm-dot-y"></div>
-                        <div class="kdm-dot kdm-dot-g"></div>
-                        <span class="kdm-mockup-title">Citation Health Report</span>
+                <div class="kdm-lp-mockup-card">
+                    <div class="kdm-lp-mockup-header">
+                        <div class="kdm-lp-dot kdm-lp-dot-r"></div>
+                        <div class="kdm-lp-dot kdm-lp-dot-y"></div>
+                        <div class="kdm-lp-dot kdm-lp-dot-g"></div>
+                        <span class="kdm-lp-mockup-title">Citation Health Report</span>
                     </div>
-                    <div class="kdm-mockup-body">
-                        <div class="kdm-citation-list">
-                            <div class="kdm-citation-item"><span class="kdm-name">Google Business Profile</span><span
-                                    class="kdm-status kdm-status-live">Live</span></div>
-                            <div class="kdm-citation-item"><span class="kdm-name">Yelp Canada</span><span
-                                    class="kdm-status kdm-status-live">Live</span></div>
-                            <div class="kdm-citation-item"><span class="kdm-name">Yellow Pages Canada</span><span
-                                    class="kdm-status kdm-status-live">Live</span></div>
-                            <div class="kdm-citation-item"><span class="kdm-name">BBB</span><span
-                                    class="kdm-status kdm-status-live">Live</span></div>
-                            <div class="kdm-citation-item"><span class="kdm-name">Homestars</span><span
-                                    class="kdm-status kdm-status-pending">In Progress</span></div>
+                    <div class="kdm-lp-mockup-body">
+                        <div class="kdm-cit-list">
+                            <div class="kdm-cit-item"><span class="kdm-cit-name">Google Business Profile</span><span
+                                    class="kdm-cit-status kdm-status-live">Live</span></div>
+                            <div class="kdm-cit-item"><span class="kdm-cit-name">Yelp Canada</span><span
+                                    class="kdm-cit-status kdm-status-live">Live</span></div>
+                            <div class="kdm-cit-item"><span class="kdm-cit-name">Yellow Pages Canada</span><span
+                                    class="kdm-cit-status kdm-status-live">Live</span></div>
+                            <div class="kdm-cit-item"><span class="kdm-cit-name">BBB</span><span
+                                    class="kdm-cit-status kdm-status-live">Live</span></div>
+                            <div class="kdm-cit-item"><span class="kdm-cit-name">Homestars</span><span
+                                    class="kdm-cit-status kdm-status-pend">In Progress</span></div>
                         </div>
-                        <div class="kdm-citation-progress">
-                            <div class="kdm-citation-progress-fill"></div>
+                        <div class="kdm-cit-prog">
+                            <div class="kdm-cit-prog-fill"></div>
                         </div>
-                        <div class="kdm-citation-progress-label"><span>Citation Health Score</span><span
+                        <div class="kdm-cit-lbl"><span>Citation Health Score</span><span
                                 style="color:var(--kdm-teal)">78 / 100</span></div>
                     </div>
                 </div>
@@ -212,64 +215,68 @@
 
             <!-- wp:column {"verticalAlignment":"center"} -->
             <div class="wp-block-column is-vertically-aligned-center">
-                <!-- wp:paragraph {"className":"kdm-tag"} -->
-                <p class="kdm-tag">Service 02</p>
+                <!-- wp:paragraph {"className":"kdm-lp-tag"} -->
+                <p class="kdm-lp-tag">Service 02</p>
                 <!-- /wp:paragraph -->
 
-                <!-- wp:heading {"className":"kdm-service-h2"} -->
-                <h2 class="wp-block-heading kdm-service-h2">Local <em>Citations</em><br>&amp; Directory<br>Listings</h2>
+                <!-- wp:heading {"className":"kdm-lp-service-h2"} -->
+                <h2 class="wp-block-heading kdm-lp-service-h2">Local <em>Citations</em><br>&amp; Directory<br>Listings
+                </h2>
                 <!-- /wp:heading -->
 
-                <!-- wp:paragraph {"className":"kdm-service-p"} -->
-                <p class="kdm-service-p">Inconsistent business information across the web confuses Google and costs you
-                    rankings. We audit, clean up, and build citations across every relevant Canadian and
+                <!-- wp:paragraph {"className":"kdm-lp-service-p"} -->
+                <p class="kdm-lp-service-p">Inconsistent business information across the web confuses Google and costs
+                    you rankings. We audit, clean up, and build citations across every relevant Canadian and
                     Toronto-specific directory.</p>
                 <!-- /wp:paragraph -->
 
-                <!-- wp:paragraph {"className":"kdm-service-p"} -->
-                <p class="kdm-service-p">Consistent NAP (Name, Address, Phone) data across Yelp, Yellow Pages, BBB, and
-                    dozens of industry directories is a foundational local ranking signal we don't cut corners on.</p>
+                <!-- wp:paragraph {"className":"kdm-lp-service-p"} -->
+                <p class="kdm-lp-service-p">Consistent NAP (Name, Address, Phone) data across Yelp, Yellow Pages, BBB,
+                    and dozens of industry directories is a foundational local ranking signal we don't cut corners on.
+                </p>
                 <!-- /wp:paragraph -->
 
-                <!-- wp:paragraph {"className":"kdm-cta-link"} -->
-                <p class="kdm-cta-link"><a href="#quote">Build My Citations &rarr;</a></p>
+                <!-- wp:paragraph {"className":"kdm-lp-link-more"} -->
+                <p class="kdm-lp-link-more"><a href="#quote">Build My Citations &rarr;</a></p>
                 <!-- /wp:paragraph -->
             </div>
             <!-- /wp:column -->
+
         </div>
         <!-- /wp:columns -->
     </div>
     <!-- /wp:group -->
 
-    <!-- SERVICE 3: AREAS -->
-    <!-- wp:group {"align":"full","className":"kdm-service-section kdm-service-alt","style":{"spacing":{"padding":{"top":"80px","bottom":"80px","left":"60px","right":"60px"}}},"layout":{"type":"constrained"}} -->
-    <div class="wp-block-group alignfull kdm-service-section kdm-service-alt"
+    <!-- SERVICE 3 -->
+    <!-- wp:group {"align":"full","className":"kdm-lp-section kdm-lp-section-alt","style":{"spacing":{"padding":{"top":"80px","bottom":"80px","left":"60px","right":"60px"}}},"layout":{"type":"constrained"}} -->
+    <div class="wp-block-group alignfull kdm-lp-section kdm-lp-section-alt"
         style="padding-top:80px;padding-right:60px;padding-bottom:80px;padding-left:60px">
         <!-- wp:columns {"verticalAlignment":"center","gap":"80px"} -->
         <div class="wp-block-columns are-vertically-aligned-center">
+
             <!-- wp:column {"verticalAlignment":"center"} -->
             <div class="wp-block-column is-vertically-aligned-center">
-                <!-- wp:paragraph {"className":"kdm-tag"} -->
-                <p class="kdm-tag">Service 03</p>
+                <!-- wp:paragraph {"className":"kdm-lp-tag"} -->
+                <p class="kdm-lp-tag">Service 03</p>
                 <!-- /wp:paragraph -->
 
-                <!-- wp:heading {"className":"kdm-service-h2"} -->
-                <h2 class="wp-block-heading kdm-service-h2">Neighbourhood<br><em>Location</em><br>Pages</h2>
+                <!-- wp:heading {"className":"kdm-lp-service-h2"} -->
+                <h2 class="wp-block-heading kdm-lp-service-h2">Neighbourhood<br><em>Location</em><br>Pages</h2>
                 <!-- /wp:heading -->
 
-                <!-- wp:paragraph {"className":"kdm-service-p"} -->
-                <p class="kdm-service-p">If you serve multiple areas of Toronto, one generic service page isn't enough.
-                    We build and optimize location-specific pages that target the exact searches your customers in each
-                    neighbourhood are making.</p>
+                <!-- wp:paragraph {"className":"kdm-lp-service-p"} -->
+                <p class="kdm-lp-service-p">If you serve multiple areas of Toronto, one generic service page isn't
+                    enough. We build and optimize location-specific pages that target the exact searches your customers
+                    in each neighbourhood are making.</p>
                 <!-- /wp:paragraph -->
 
-                <!-- wp:paragraph {"className":"kdm-service-p"} -->
-                <p class="kdm-service-p">Whether you need pages for Downtown Toronto, East York, or both, we create
+                <!-- wp:paragraph {"className":"kdm-lp-service-p"} -->
+                <p class="kdm-lp-service-p">Whether you need pages for Downtown Toronto, East York, or both, we create
                     content that ranks — not thin duplicate pages that Google ignores.</p>
                 <!-- /wp:paragraph -->
 
-                <!-- wp:paragraph {"className":"kdm-cta-link"} -->
-                <p class="kdm-cta-link"><a href="#quote">Build My Location Pages &rarr;</a></p>
+                <!-- wp:paragraph {"className":"kdm-lp-link-more"} -->
+                <p class="kdm-lp-link-more"><a href="#quote">Build My Location Pages &rarr;</a></p>
                 <!-- /wp:paragraph -->
             </div>
             <!-- /wp:column -->
@@ -277,47 +284,44 @@
             <!-- wp:column {"verticalAlignment":"center"} -->
             <div class="wp-block-column is-vertically-aligned-center">
                 <!-- wp:html -->
-                <div class="kdm-mockup-card">
-                    <div class="kdm-mockup-header">
-                        <div class="kdm-dot kdm-dot-r"></div>
-                        <div class="kdm-dot kdm-dot-y"></div>
-                        <div class="kdm-dot kdm-dot-g"></div>
-                        <span class="kdm-mockup-title">Location Page Rankings</span>
+                <div class="kdm-lp-mockup-card">
+                    <div class="kdm-lp-mockup-header">
+                        <div class="kdm-lp-dot kdm-lp-dot-r"></div>
+                        <div class="kdm-lp-dot kdm-lp-dot-y"></div>
+                        <div class="kdm-lp-dot kdm-lp-dot-g"></div>
+                        <span class="kdm-lp-mockup-title">Location Page Rankings</span>
                     </div>
-                    <div class="kdm-mockup-body">
-                        <div class="kdm-loc-pages">
-                            <div class="kdm-loc-page-item">
-                                <div class="kdm-loc-icon">📍</div>
-                                <div class="kdm-loc-info">
+                    <div class="kdm-lp-mockup-body">
+                        <div class="kdm-loc-list">
+                            <div class="kdm-loc-item">
+                                <div class="kdm-loc-ico">📍</div>
+                                <div class="kdm-loc-inf">
                                     <div class="kdm-loc-name">Downtown Toronto</div>
                                     <div class="kdm-loc-bar">
-                                        <div class="kdm-loc-bar-fill" style="width:92%;background:var(--kdm-teal)">
-                                        </div>
+                                        <div class="kdm-loc-bar-f" style="width:92%;background:var(--kdm-teal)"></div>
                                     </div>
                                 </div>
-                                <div class="kdm-loc-rank">#2</div>
+                                <div class="kdm-loc-rnk">#2</div>
                             </div>
-                            <div class="kdm-loc-page-item">
-                                <div class="kdm-loc-icon">📍</div>
-                                <div class="kdm-loc-info">
+                            <div class="kdm-loc-item">
+                                <div class="kdm-loc-ico">📍</div>
+                                <div class="kdm-loc-inf">
                                     <div class="kdm-loc-name">East York</div>
                                     <div class="kdm-loc-bar">
-                                        <div class="kdm-loc-bar-fill" style="width:78%;background:var(--kdm-gold)">
-                                        </div>
+                                        <div class="kdm-loc-bar-f" style="width:78%;background:var(--kdm-gold)"></div>
                                     </div>
                                 </div>
-                                <div class="kdm-loc-rank">#4</div>
+                                <div class="kdm-loc-rnk">#4</div>
                             </div>
-                            <div class="kdm-loc-page-item">
-                                <div class="kdm-loc-icon">📍</div>
-                                <div class="kdm-loc-info">
+                            <div class="kdm-loc-item">
+                                <div class="kdm-loc-ico">📍</div>
+                                <div class="kdm-loc-inf">
                                     <div class="kdm-loc-name">Toronto (GTA)</div>
                                     <div class="kdm-loc-bar">
-                                        <div class="kdm-loc-bar-fill" style="width:85%;background:var(--kdm-teal)">
-                                        </div>
+                                        <div class="kdm-loc-bar-f" style="width:85%;background:var(--kdm-teal)"></div>
                                     </div>
                                 </div>
-                                <div class="kdm-loc-rank">#3</div>
+                                <div class="kdm-loc-rnk">#3</div>
                             </div>
                         </div>
                     </div>
@@ -325,14 +329,15 @@
                 <!-- /wp:html -->
             </div>
             <!-- /wp:column -->
+
         </div>
         <!-- /wp:columns -->
     </div>
     <!-- /wp:group -->
 
-    <!-- SERVICE 4: MAPS -->
-    <!-- wp:group {"align":"full","className":"kdm-service-section","style":{"spacing":{"padding":{"top":"80px","bottom":"80px","left":"60px","right":"60px"}}},"layout":{"type":"constrained"}} -->
-    <div class="wp-block-group alignfull kdm-service-section"
+    <!-- SERVICE 4 -->
+    <!-- wp:group {"align":"full","className":"kdm-lp-section","style":{"spacing":{"padding":{"top":"80px","bottom":"80px","left":"60px","right":"60px"}}},"layout":{"type":"constrained"}} -->
+    <div class="wp-block-group alignfull kdm-lp-section"
         style="padding-top:80px;padding-right:60px;padding-bottom:80px;padding-left:60px">
         <!-- wp:columns {"verticalAlignment":"center","gap":"80px"} -->
         <div class="wp-block-columns are-vertically-aligned-center">
@@ -340,52 +345,50 @@
             <!-- wp:column {"verticalAlignment":"center"} -->
             <div class="wp-block-column is-vertically-aligned-center">
                 <!-- wp:html -->
-                <div class="kdm-mockup-card">
-                    <div class="kdm-mockup-header">
-                        <div class="kdm-dot kdm-dot-r"></div>
-                        <div class="kdm-dot kdm-dot-y"></div>
-                        <div class="kdm-dot kdm-dot-g"></div>
-                        <span class="kdm-mockup-title">Local Pack Snapshot — Toronto</span>
+                <div class="kdm-lp-mockup-card">
+                    <div class="kdm-lp-mockup-header">
+                        <div class="kdm-lp-dot kdm-lp-dot-r"></div>
+                        <div class="kdm-lp-dot kdm-lp-dot-y"></div>
+                        <div class="kdm-lp-dot kdm-lp-dot-g"></div>
+                        <span class="kdm-lp-mockup-title">Local Pack Snapshot — Toronto</span>
                     </div>
-                    <div class="kdm-mockup-body">
-                        <div class="kdm-maps-visual">
-                            <div class="kdm-map-pin-group">
+                    <div class="kdm-lp-mockup-body">
+                        <div class="kdm-map-vis">
+                            <div class="kdm-map-grp">
                                 <div class="kdm-map-pin">
                                     <div class="kdm-pin kdm-pin-1"></div>
-                                    <div class="kdm-pin-label">Your Business</div>
+                                    <div class="kdm-pin-lbl">Your Business</div>
                                 </div>
                                 <div class="kdm-map-pin">
                                     <div class="kdm-pin kdm-pin-2"></div>
-                                    <div class="kdm-pin-label">Competitor A</div>
+                                    <div class="kdm-pin-lbl">Competitor A</div>
                                 </div>
                                 <div class="kdm-map-pin">
                                     <div class="kdm-pin kdm-pin-3"></div>
-                                    <div class="kdm-pin-label">Competitor B</div>
+                                    <div class="kdm-pin-lbl">Competitor B</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="kdm-pack-results">
+                        <div class="kdm-pack-list">
                             <div class="kdm-pack-item">
                                 <div class="kdm-pack-pos" style="color:var(--kdm-gold)">1</div>
                                 <div class="kdm-pack-info">
-                                    <div class="kdm-pack-name" style="color:var(--kdm-gold)">Your Business</div>
-                                    <div class="kdm-pack-stars">★★★★★ 4.9 · 127 reviews</div>
+                                    <div class="name" style="color:var(--kdm-gold)">Your Business</div>
+                                    <div class="stars">★★★★★ 4.9 · 127 reviews</div>
                                 </div>
                             </div>
                             <div class="kdm-pack-item">
                                 <div class="kdm-pack-pos" style="color:var(--kdm-muted)">2</div>
                                 <div class="kdm-pack-info">
-                                    <div class="kdm-pack-name">Competitor A</div>
-                                    <div class="kdm-pack-stars" style="color:var(--kdm-muted)">★★★★☆ 4.2 · 43 reviews
-                                    </div>
+                                    <div class="name">Competitor A</div>
+                                    <div class="stars" style="color:var(--kdm-muted)">★★★★☆ 4.2 · 43 reviews</div>
                                 </div>
                             </div>
                             <div class="kdm-pack-item">
                                 <div class="kdm-pack-pos" style="color:var(--kdm-muted)">3</div>
                                 <div class="kdm-pack-info">
-                                    <div class="kdm-pack-name">Competitor B</div>
-                                    <div class="kdm-pack-stars" style="color:var(--kdm-muted)">★★★★☆ 4.0 · 31 reviews
-                                    </div>
+                                    <div class="name">Competitor B</div>
+                                    <div class="stars" style="color:var(--kdm-muted)">★★★★☆ 4.0 · 31 reviews</div>
                                 </div>
                             </div>
                         </div>
@@ -397,83 +400,83 @@
 
             <!-- wp:column {"verticalAlignment":"center"} -->
             <div class="wp-block-column is-vertically-aligned-center">
-                <!-- wp:paragraph {"className":"kdm-tag"} -->
-                <p class="kdm-tag">Service 04</p>
+                <!-- wp:paragraph {"className":"kdm-lp-tag"} -->
+                <p class="kdm-lp-tag">Service 04</p>
                 <!-- /wp:paragraph -->
 
-                <!-- wp:heading {"className":"kdm-service-h2"} -->
-                <h2 class="wp-block-heading kdm-service-h2">Google Maps &amp;<br><em>Local Pack</em><br>Ranking</h2>
+                <!-- wp:heading {"className":"kdm-lp-service-h2"} -->
+                <h2 class="wp-block-heading kdm-lp-service-h2">Google Maps &amp;<br><em>Local Pack</em><br>Ranking</h2>
                 <!-- /wp:heading -->
 
-                <!-- wp:paragraph {"className":"kdm-service-p"} -->
-                <p class="kdm-service-p">The Local Pack — those three businesses that appear at the top of Google with a
-                    map — captures the majority of local search clicks. Getting into it requires a combination of GBP
-                    optimization, reviews, proximity signals, and on-page authority.</p>
+                <!-- wp:paragraph {"className":"kdm-lp-service-p"} -->
+                <p class="kdm-lp-service-p">The Local Pack — those three businesses that appear at the top of Google
+                    with a map — captures the majority of local search clicks. Getting into it requires a combination of
+                    GBP optimization, reviews, proximity signals, and on-page authority.</p>
                 <!-- /wp:paragraph -->
 
-                <!-- wp:paragraph {"className":"kdm-service-p"} -->
-                <p class="kdm-service-p">We know exactly what moves the needle for Toronto's Local Pack and build a
+                <!-- wp:paragraph {"className":"kdm-lp-service-p"} -->
+                <p class="kdm-lp-service-p">We know exactly what moves the needle for Toronto's Local Pack and build a
                     strategy around getting your business into those top three spots.</p>
                 <!-- /wp:paragraph -->
 
-                <!-- wp:paragraph {"className":"kdm-cta-link"} -->
-                <p class="kdm-cta-link"><a href="#quote">Get Into the Local Pack &rarr;</a></p>
+                <!-- wp:paragraph {"className":"kdm-lp-link-more"} -->
+                <p class="kdm-lp-link-more"><a href="#quote">Get Into the Local Pack &rarr;</a></p>
                 <!-- /wp:paragraph -->
             </div>
             <!-- /wp:column -->
+
         </div>
         <!-- /wp:columns -->
     </div>
     <!-- /wp:group -->
 
     <!-- AREAS SECTION -->
-    <!-- wp:group {"align":"full","className":"kdm-areas-section","style":{"spacing":{"padding":{"top":"80px","bottom":"80px","left":"60px","right":"60px"}}},"layout":{"type":"constrained","contentSize":"900px"}} -->
-    <div class="wp-block-group alignfull kdm-areas-section"
+    <!-- wp:group {"align":"full","className":"kdm-lp-areas","style":{"spacing":{"padding":{"top":"80px","bottom":"80px","left":"60px","right":"60px"}}},"layout":{"type":"constrained","contentSize":"900px"}} -->
+    <div class="wp-block-group alignfull kdm-lp-areas"
         style="padding-top:80px;padding-right:60px;padding-bottom:80px;padding-left:60px">
-        <!-- wp:paragraph {"align":"center","className":"kdm-section-label"} -->
-        <p class="has-text-align-center kdm-section-label">Areas We Serve</p>
+        <!-- wp:paragraph {"align":"center","className":"kdm-lp-section-label"} -->
+        <p class="has-text-align-center kdm-lp-section-label">Areas We Serve</p>
         <!-- /wp:paragraph -->
 
-        <!-- wp:heading {"textAlign":"center","className":"kdm-intro-h2"} -->
-        <h2 class="wp-block-heading has-text-align-center kdm-intro-h2">Local SEO for <em>Downtown Toronto</em><br>and
+        <!-- wp:heading {"textAlign":"center","className":"kdm-lp-h2"} -->
+        <h2 class="wp-block-heading has-text-align-center kdm-lp-h2">Local SEO for <em>Downtown Toronto</em><br>and
             <em>East York</em></h2>
         <!-- /wp:heading -->
 
-        <!-- wp:paragraph {"align":"center","className":"kdm-intro-p"} -->
-        <p class="has-text-align-center kdm-intro-p" style="margin-bottom: 48px;">We don't just understand Toronto — we
+        <!-- wp:paragraph {"align":"center","className":"kdm-lp-intro-p","style":{"spacing":{"margin":{"bottom":"48px"}}}} -->
+        <p class="has-text-align-center kdm-lp-intro-p" style="margin-bottom:48px">We don't just understand Toronto — we
             know how customers in each neighbourhood search, what they expect, and how to make your business the obvious
             choice.</p>
         <!-- /wp:paragraph -->
 
-        <!-- wp:columns -->
-        <div class="wp-block-columns" style="max-width: 820px; margin: 0 auto; gap: 24px;">
-            <!-- wp:column {"className":"kdm-area-card","style":{"spacing":{"padding":{"top":"28px","bottom":"28px","left":"32px","right":"32px"}}}} -->
-            <div class="wp-block-column kdm-area-card"
+        <!-- wp:columns {"gap":"24px"} -->
+        <div class="wp-block-columns" style="max-width:820px;margin:0 auto">
+            <!-- wp:column {"className":"kdm-lp-area-card","style":{"spacing":{"padding":{"top":"28px","bottom":"28px","left":"32px","right":"32px"}}}} -->
+            <div class="wp-block-column kdm-lp-area-card"
                 style="padding-top:28px;padding-right:32px;padding-bottom:28px;padding-left:32px">
                 <!-- wp:heading {"level":3} -->
                 <h3 class="wp-block-heading">Downtown Toronto</h3>
                 <!-- /wp:heading -->
 
-                <!-- wp:paragraph {"className":"kdm-service-p"} -->
-                <p class="kdm-service-p" style="margin-bottom:0!important; line-height: 1.6;">The most competitive local
-                    market in Canada. We help service businesses, restaurants, retail, and professionals cut through the
-                    noise and rank for the high-intent searches driving real foot traffic and phone calls in the core.
-                </p>
+                <!-- wp:paragraph -->
+                <p>The most competitive local market in Canada. We help service businesses, restaurants, retail, and
+                    professionals cut through the noise and rank for the high-intent searches driving real foot traffic
+                    and phone calls in the core.</p>
                 <!-- /wp:paragraph -->
             </div>
             <!-- /wp:column -->
 
-            <!-- wp:column {"className":"kdm-area-card","style":{"spacing":{"padding":{"top":"28px","bottom":"28px","left":"32px","right":"32px"}}}} -->
-            <div class="wp-block-column kdm-area-card"
+            <!-- wp:column {"className":"kdm-lp-area-card","style":{"spacing":{"padding":{"top":"28px","bottom":"28px","left":"32px","right":"32px"}}}} -->
+            <div class="wp-block-column kdm-lp-area-card"
                 style="padding-top:28px;padding-right:32px;padding-bottom:28px;padding-left:32px">
                 <!-- wp:heading {"level":3} -->
                 <h3 class="wp-block-heading">East York</h3>
                 <!-- /wp:heading -->
 
-                <!-- wp:paragraph {"className":"kdm-service-p"} -->
-                <p class="kdm-service-p" style="margin-bottom:0!important; line-height: 1.6;">A growing community with
-                    strong neighbourhood loyalty. Customers here search hyper-locally — by street, by intersection. We
-                    build location pages and GBP strategies that tap into exactly how East York searches.</p>
+                <!-- wp:paragraph -->
+                <p>A growing community with strong neighbourhood loyalty. Customers here search hyper-locally — by
+                    street, by intersection. We build location pages and GBP strategies that tap into exactly how East
+                    York searches.</p>
                 <!-- /wp:paragraph -->
             </div>
             <!-- /wp:column -->
@@ -483,15 +486,15 @@
     <!-- /wp:group -->
 
     <!-- FAQ SECTION -->
-    <!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"80px","bottom":"80px"}}},"layout":{"type":"constrained","contentSize":"860px"}} -->
-    <div class="wp-block-group alignwide" style="padding-top:80px;padding-bottom:80px">
-        <!-- wp:heading {"textAlign":"center","className":"kdm-intro-h2"} -->
-        <h2 class="wp-block-heading has-text-align-center kdm-intro-h2" style="margin-bottom: 40px !important;">Local
-            SEO <em>FAQs</em></h2>
+    <!-- wp:group {"align":"wide","className":"kdm-lp-faq","style":{"spacing":{"padding":{"top":"80px","bottom":"80px"}}},"layout":{"type":"constrained","contentSize":"860px"}} -->
+    <div class="wp-block-group alignwide kdm-lp-faq" style="padding-top:80px;padding-bottom:80px">
+        <!-- wp:heading {"textAlign":"center","className":"kdm-lp-h2","style":{"spacing":{"margin":{"bottom":"40px"}}}} -->
+        <h2 class="wp-block-heading has-text-align-center kdm-lp-h2" style="margin-bottom:40px">Local SEO <em>FAQs</em>
+        </h2>
         <!-- /wp:heading -->
 
-        <!-- wp:details {"className":"kdm-faq-item"} -->
-        <details class="wp-block-details kdm-faq-item">
+        <!-- wp:details {"className":"kdm-lp-faq-item"} -->
+        <details class="wp-block-details kdm-lp-faq-item">
             <summary>How long does it take to see results from local SEO in Toronto?</summary>
             <!-- wp:paragraph -->
             <p>Most Toronto businesses start seeing measurable movement in Google Maps and local search rankings within
@@ -502,8 +505,8 @@
         </details>
         <!-- /wp:details -->
 
-        <!-- wp:details {"className":"kdm-faq-item"} -->
-        <details class="wp-block-details kdm-faq-item">
+        <!-- wp:details {"className":"kdm-lp-faq-item"} -->
+        <details class="wp-block-details kdm-lp-faq-item">
             <summary>Do I need a physical address in Toronto to rank locally?</summary>
             <!-- wp:paragraph -->
             <p>Not necessarily. Service-area businesses (plumbers, cleaners, mobile services) can rank in Google Maps
@@ -513,8 +516,8 @@
         </details>
         <!-- /wp:details -->
 
-        <!-- wp:details {"className":"kdm-faq-item"} -->
-        <details class="wp-block-details kdm-faq-item">
+        <!-- wp:details {"className":"kdm-lp-faq-item"} -->
+        <details class="wp-block-details kdm-lp-faq-item">
             <summary>What's the difference between local SEO and regular SEO?</summary>
             <!-- wp:paragraph -->
             <p>Regular SEO focuses on ranking in the standard organic results for broader search terms. Local SEO
@@ -525,8 +528,8 @@
         </details>
         <!-- /wp:details -->
 
-        <!-- wp:details {"className":"kdm-faq-item"} -->
-        <details class="wp-block-details kdm-faq-item">
+        <!-- wp:details {"className":"kdm-lp-faq-item"} -->
+        <details class="wp-block-details kdm-lp-faq-item">
             <summary>Can you help me rank in multiple Toronto neighbourhoods?</summary>
             <!-- wp:paragraph -->
             <p>Yes. We create dedicated, optimized location pages for each service area — Downtown Toronto, East York,
@@ -536,8 +539,8 @@
         </details>
         <!-- /wp:details -->
 
-        <!-- wp:details {"className":"kdm-faq-item"} -->
-        <details class="wp-block-details kdm-faq-item">
+        <!-- wp:details {"className":"kdm-lp-faq-item"} -->
+        <details class="wp-block-details kdm-lp-faq-item">
             <summary>How much does local SEO in Toronto cost?</summary>
             <!-- wp:paragraph -->
             <p>Our local SEO work is included as part of our Growth ($600/month) and Premium ($1,000/month) SEO
@@ -550,57 +553,61 @@
     <!-- /wp:group -->
 
     <!-- CTA BAND -->
-    <!-- wp:group {"align":"full","className":"kdm-areas-section","style":{"spacing":{"padding":{"top":"80px","bottom":"80px","left":"60px","right":"60px"}}},"layout":{"type":"constrained","contentSize":"900px"}} -->
-    <div class="wp-block-group alignfull kdm-areas-section"
-        style="padding-top:80px;padding-right:60px;padding-bottom:80px;padding-left:60px; text-align: center;">
-        <!-- wp:heading {"textAlign":"center","className":"kdm-intro-h2"} -->
-        <h2 class="wp-block-heading has-text-align-center kdm-intro-h2">Ready to Show Up<br>Where Toronto
+    <!-- wp:group {"align":"full","className":"kdm-lp-areas","style":{"spacing":{"padding":{"top":"80px","bottom":"80px","left":"60px","right":"60px"}}},"layout":{"type":"constrained","contentSize":"900px"}} -->
+    <div class="wp-block-group alignfull kdm-lp-areas"
+        style="padding-top:80px;padding-right:60px;padding-bottom:80px;padding-left:60px">
+        <!-- wp:heading {"textAlign":"center","className":"kdm-lp-h2"} -->
+        <h2 class="wp-block-heading has-text-align-center kdm-lp-h2">Ready to Show Up<br>Where Toronto
             <em>Searches?</em></h2>
         <!-- /wp:heading -->
 
-        <!-- wp:paragraph {"align":"center","className":"kdm-intro-p"} -->
-        <p class="has-text-align-center kdm-intro-p" style="margin-bottom: 36px;">Get a free local SEO strategy call —
+        <!-- wp:paragraph {"align":"center","className":"kdm-lp-intro-p","style":{"spacing":{"margin":{"bottom":"36px"}}}} -->
+        <p class="has-text-align-center kdm-lp-intro-p" style="margin-bottom:36px">Get a free local SEO strategy call —
             no fluff, just a clear picture of where you stand and what it takes to rank.</p>
         <!-- /wp:paragraph -->
 
-        <!-- wp:button {"className":"kdm-btn-primary"} -->
-        <div class="wp-block-button kdm-btn-primary" style="display:inline-block;"><a
-                class="wp-block-button__link wp-element-button" href="#quote">Book My Free Strategy Call</a></div>
-        <!-- /wp:button -->
+        <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
+        <div class="wp-block-buttons" style="justify-content:center">
+            <!-- wp:button {"className":"kdm-lp-btn-primary"} -->
+            <div class="wp-block-button kdm-lp-btn-primary"><a class="wp-block-button__link wp-element-button"
+                    href="#quote">Book My Free Strategy Call</a></div>
+            <!-- /wp:button -->
+        </div>
+        <!-- /wp:buttons -->
     </div>
     <!-- /wp:group -->
 
     <!-- QUOTE FORM SECTION -->
-    <!-- wp:group {"align":"full","className":"kdm-quote-section","style":{"spacing":{"padding":{"top":"80px","bottom":"80px","left":"60px","right":"60px"}}},"layout":{"type":"constrained"}} -->
-    <div class="wp-block-group alignfull kdm-quote-section" id="quote"
+    <!-- wp:group {"align":"full","className":"kdm-lp-section kdm-lp-section-alt","style":{"spacing":{"padding":{"top":"80px","bottom":"80px","left":"60px","right":"60px"}}},"layout":{"type":"constrained"}} -->
+    <div class="wp-block-group alignfull kdm-lp-section kdm-lp-section-alt" id="quote"
         style="padding-top:80px;padding-right:60px;padding-bottom:80px;padding-left:60px">
-        <!-- wp:heading {"textAlign":"center","className":"kdm-intro-h2"} -->
-        <h2 class="wp-block-heading has-text-align-center kdm-intro-h2">Request A Quote</h2>
+        <!-- wp:heading {"textAlign":"center","className":"kdm-lp-h2"} -->
+        <h2 class="wp-block-heading has-text-align-center kdm-lp-h2" style="margin-bottom:40px">Request A Quote</h2>
         <!-- /wp:heading -->
 
         <!-- wp:html -->
-        <form class="kdm-quote-form">
-            <div class="kdm-form-group">
+        <form class="kdm-lp-quote-form">
+            <div class="kdm-lp-form-group">
                 <label>First Name</label>
                 <input type="text" placeholder="Jane" />
             </div>
-            <div class="kdm-form-group">
+            <div class="kdm-lp-form-group">
                 <label>Last Name</label>
                 <input type="text" placeholder="Smith" />
             </div>
-            <div class="kdm-form-group">
+            <div class="kdm-lp-form-group">
                 <label>Email</label>
                 <input type="email" placeholder="jane@company.com" />
             </div>
-            <div class="kdm-form-group">
+            <div class="kdm-lp-form-group">
                 <label>Phone</label>
                 <input type="tel" placeholder="416-555-0100" />
             </div>
-            <div class="kdm-form-group" style="grid-column:1/-1">
+            <div class="kdm-lp-form-group" style="grid-column:1/-1">
                 <label>Message</label>
                 <textarea placeholder="Tell us about your business and goals…"></textarea>
             </div>
-            <button type="submit" class="kdm-quote-submit">Start Your Free, No-Obligation Consultation →</button>
+            <button type="submit" class="kdm-lp-form-submit">Start Your Free Consultation →</button>
         </form>
         <!-- /wp:html -->
     </div>
