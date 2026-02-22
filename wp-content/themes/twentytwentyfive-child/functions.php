@@ -10,11 +10,13 @@ function twentytwentyfive_child_enqueue_styles()
         get_template_directory_uri() . '/style.css'
     );
     // Enqueue the child theme stylesheet
+    $css_file = (!is_user_logged_in() && file_exists(get_stylesheet_directory() . '/style.min.css')) ? '/style.min.css' : '/style.css';
+
     wp_enqueue_style(
         'twentytwentyfive-child-style',
-        get_stylesheet_directory_uri() . '/style.css',
+        get_stylesheet_directory_uri() . $css_file,
         array('twentytwentyfive-parent-style'),
-        filemtime(get_stylesheet_directory() . '/style.css')
+        filemtime(get_stylesheet_directory() . $css_file)
     );
     wp_enqueue_style(
         'kdm-google-fonts',
