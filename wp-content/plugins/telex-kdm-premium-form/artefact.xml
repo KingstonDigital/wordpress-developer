@@ -1,0 +1,2066 @@
+<?xml version="1.0"?>
+<artefact xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="artefact.xsd" name="KDM Premium Vibrant Form" slug="telex-kdm-premium-form" type="code-package" schemaVersion="2">
+  <file path="readme.txt">
+    <description>Readme file for the KDM Premium Vibrant Form block plugin.</description>
+    <content><![CDATA[
+=== KDM Premium Vibrant Form ===
+
+Contributors:      WordPress Telex
+Tags:              block, form, contact, turnstile
+Tested up to:      6.8
+Stable tag:        0.1.0
+License:           GPLv2 or later
+License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+
+A premium, vibrant contact form block for WordPress with dark-themed styling, Cloudflare Turnstile bot protection, honeypot field, rate limiting, and two layout modes. Email delivery uses wp_mail(), so any SMTP plugin you have installed will handle routing automatically.
+
+== Description ==
+
+KDM Premium Vibrant Form is a beautifully designed, dark-themed contact form block that integrates directly into the WordPress Block Editor. It provides two layout modes — Compact Box (sidebar-style) and Wide Row (footer-style) — along with enterprise-grade security features.
+
+**Features:**
+
+* Two layout modes: Compact Box and Wide Row
+* Cloudflare Turnstile bot protection with server-side verification
+* Hidden honeypot field to trap bots
+* Minimum input delay detection (rejects submissions that are too fast for a human)
+* Transient-based rate limiting per hashed IP address (anonymized, daily rotating salt)
+* One-time submission tokens to prevent double-submit attacks
+* Origin/Referer validation to block cross-site form submissions
+* Email header injection protection (newline stripping on all header-used values)
+* Input length limits enforced on both client and server (name: 100, email: 254, phone: 30, message: 5000)
+* Optional submission logging with anonymized IPs for monitoring
+* Server-side attribute resolution — notification email and success message are never exposed in client-side markup
+* CSP-compatible inline script loading via wp_add_inline_script
+* Uses wp_mail() for email delivery — works automatically with any SMTP plugin
+* AJAX-powered form submission with animated feedback and double-click prevention
+* Fully customizable heading, description, success message, and notification email
+* Dark-themed premium design with custom CSS tokens
+* Sanitized and validated inputs on both client and server
+
+== Installation ==
+
+1. Upload the plugin files to the `/wp-content/plugins/telex-kdm-premium-form` directory, or install the plugin through the WordPress plugins screen directly.
+2. Activate the plugin through the 'Plugins' screen in WordPress.
+3. Configure Turnstile and rate limiting settings under Settings > KDM Form Settings.
+4. Insert the "KDM Premium Vibrant Form" block in any post or page.
+
+== Frequently Asked Questions ==
+
+= How does email delivery work? =
+
+The form uses the standard WordPress wp_mail() function. If you have an SMTP plugin installed (such as WP Mail SMTP, Post SMTP, or FluentSMTP), it will automatically handle all email routing through your configured provider. No additional SMTP setup is needed in this plugin.
+
+= How do I enable Cloudflare Turnstile? =
+
+Enter your Turnstile Site Key and Secret Key under Settings > KDM Form Settings. The widget will automatically appear in the form on the front end.
+
+= What is the rate limiting feature? =
+
+You can set a send delay (in seconds) under Settings > KDM Form Settings. This prevents the same IP address from submitting the form more than once within the specified interval.
+
+= What is the minimum input delay? =
+
+Bots typically fill and submit forms in under a second. The minimum input delay setting (default: 3 seconds) silently rejects any submission made faster than this threshold. You can adjust or disable this under Settings > KDM Form Settings.
+
+= What is the submission token (double-submit prevention)? =
+
+Each time the form is rendered, a unique one-time token is generated and embedded in a hidden field. When the form is submitted, the server verifies and consumes the token — preventing the same form from being submitted twice. After a successful submission, the user must refresh the page to get a new token.
+
+= Can I enable logging for monitoring? =
+
+Yes. Under Settings > KDM Form Settings, enable "Submission Logging". All rejected submissions (spam, rate limit, validation errors) and successful ones are logged to your PHP error log with anonymized IP addresses.
+
+= How are IP addresses protected? =
+
+IP addresses used for rate limiting are hashed with a daily rotating salt — raw IPs are never stored in the database. When logging is enabled, IP addresses are anonymized (last octet zeroed for IPv4, last 80 bits zeroed for IPv6).
+
+= Where does the notification email go if none is set? =
+
+If no notification email is configured on the block, the form will automatically send submissions to the WordPress admin email address (Settings > General > Administration Email Address).
+
+= How does the honeypot field work? =
+
+A hidden form field called "website_url" is included in the form markup but invisible to real users. Bots that auto-fill all fields will populate this hidden field, and the server will silently discard their submission without revealing that spam was detected.
+
+== Screenshots ==
+
+1. The form block in the editor with Compact Box layout.
+2. The form on the front end with Wide Row layout.
+3. The KDM Form Settings page in the WordPress admin.
+
+== Changelog ==
+
+= 0.1.0 =
+* Initial release with full form, Turnstile, honeypot, and rate limiting support. Email via wp_mail().
+]]></content>
+  </file>
+  <file path="telex-kdm-premium-form.php">
+    <description>Main plugin file with block registration, settings page, AJAX handlers, SMTP integration, and security logic.</description>
+    <content><![CDATA[<?php
+/**
+ * Plugin Name:       KDM Premium Vibrant Form
+ * Description:       A premium dark-themed contact form block with Cloudflare Turnstile, honeypot, rate limiting, and wp_mail() support.
+ * Version:           0.1.0
+ * Requires at least: 6.2
+ * Requires PHP:      7.4
+ * Author:            WordPress Telex
+ * License:           GPLv2 or later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       telex-kdm-premium-form
+ *
+ * @package TelexKdmPremiumForm
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Registers the block using the metadata loaded from the `block.json` file.
+ */
+if ( ! function_exists( 'telex_kdm_premium_form_block_init' ) ) {
+	function telex_kdm_premium_form_block_init() {
+		register_block_type( __DIR__ . '/build/' );
+	}
+}
+add_action( 'init', 'telex_kdm_premium_form_block_init' );
+
+/**
+ * Enqueue Google Fonts for the front end and editor.
+ */
+if ( ! function_exists( 'telex_kdm_premium_form_enqueue_fonts' ) ) {
+	function telex_kdm_premium_form_enqueue_fonts() {
+		wp_enqueue_style(
+			'kdm-premium-form-fonts',
+			'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap',
+			array(),
+			'1.0.0'
+		);
+	}
+}
+add_action( 'wp_enqueue_scripts', 'telex_kdm_premium_form_enqueue_fonts' );
+add_action( 'enqueue_block_editor_assets', 'telex_kdm_premium_form_enqueue_fonts' );
+
+/**
+ * Enqueue Turnstile script on the front end if site key is set.
+ */
+if ( ! function_exists( 'telex_kdm_premium_form_enqueue_turnstile' ) ) {
+	function telex_kdm_premium_form_enqueue_turnstile() {
+		$site_key = get_option( 'kdm_turnstile_site_key', '' );
+		if ( ! empty( $site_key ) ) {
+			wp_enqueue_script(
+				'cloudflare-turnstile',
+				'https://challenges.cloudflare.com/turnstile/v0/api.js',
+				array(),
+				null,
+				true
+			);
+		}
+	}
+}
+add_action( 'wp_enqueue_scripts', 'telex_kdm_premium_form_enqueue_turnstile' );
+
+/**
+ * Pass AJAX URL, nonce, turnstile site key, and minimum delay to the front end
+ * using wp_add_inline_script for CSP compatibility.
+ */
+if ( ! function_exists( 'telex_kdm_premium_form_inline_script' ) ) {
+	function telex_kdm_premium_form_inline_script() {
+		$handle = 'telex-block-telex-kdm-premium-form-view-script';
+		$data   = array(
+			'ajaxUrl'          => admin_url( 'admin-ajax.php' ),
+			'nonce'            => wp_create_nonce( 'kdm_form_nonce' ),
+			'turnstileSiteKey' => get_option( 'kdm_turnstile_site_key', '' ),
+			'minInputDelay'    => absint( get_option( 'kdm_min_input_delay', 3 ) ),
+		);
+		$json   = wp_json_encode( $data );
+		wp_add_inline_script( $handle, 'var kdmFormData = ' . $json . ';', 'before' );
+	}
+}
+add_action( 'wp_enqueue_scripts', 'telex_kdm_premium_form_inline_script' );
+
+/**
+ * Register the settings page.
+ */
+if ( ! function_exists( 'telex_kdm_premium_form_add_settings_page' ) ) {
+	function telex_kdm_premium_form_add_settings_page() {
+		add_options_page(
+			__( 'KDM Form Settings', 'telex-kdm-premium-form' ),
+			__( 'KDM Form Settings', 'telex-kdm-premium-form' ),
+			'manage_options',
+			'kdm-form-settings',
+			'telex_kdm_premium_form_render_settings_page'
+		);
+	}
+}
+add_action( 'admin_menu', 'telex_kdm_premium_form_add_settings_page' );
+
+/**
+ * Register settings.
+ */
+if ( ! function_exists( 'telex_kdm_premium_form_register_settings' ) ) {
+	function telex_kdm_premium_form_register_settings() {
+		register_setting( 'kdm_form_settings_group', 'kdm_turnstile_site_key', array(
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+			'default'           => '',
+		) );
+		register_setting( 'kdm_form_settings_group', 'kdm_turnstile_secret_key', array(
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+			'default'           => '',
+		) );
+		register_setting( 'kdm_form_settings_group', 'kdm_send_delay', array(
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'default'           => 30,
+		) );
+		register_setting( 'kdm_form_settings_group', 'kdm_min_input_delay', array(
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'default'           => 3,
+		) );
+		register_setting( 'kdm_form_settings_group', 'kdm_enable_logging', array(
+			'type'              => 'boolean',
+			'sanitize_callback' => 'rest_sanitize_boolean',
+			'default'           => false,
+		) );
+	}
+}
+add_action( 'admin_init', 'telex_kdm_premium_form_register_settings' );
+
+/**
+ * Render the settings page.
+ */
+if ( ! function_exists( 'telex_kdm_premium_form_render_settings_page' ) ) {
+	function telex_kdm_premium_form_render_settings_page() {
+		$ts_site_key     = get_option( 'kdm_turnstile_site_key', '' );
+		$ts_secret       = get_option( 'kdm_turnstile_secret_key', '' );
+		$send_delay      = get_option( 'kdm_send_delay', 30 );
+		$min_input_delay = get_option( 'kdm_min_input_delay', 3 );
+		$enable_logging  = get_option( 'kdm_enable_logging', false );
+		?>
+		<div class="wrap">
+			<h1><?php esc_html_e( 'KDM Form Settings', 'telex-kdm-premium-form' ); ?></h1>
+			<p class="description">
+				<?php esc_html_e( 'Email delivery is handled by wp_mail(). If you have an SMTP plugin installed (e.g. WP Mail SMTP, Post SMTP, FluentSMTP), it will automatically route all form emails through your configured SMTP provider.', 'telex-kdm-premium-form' ); ?>
+			</p>
+			<form method="post" action="options.php">
+				<?php settings_fields( 'kdm_form_settings_group' ); ?>
+				<h2><?php esc_html_e( 'Bot Protection (Cloudflare Turnstile)', 'telex-kdm-premium-form' ); ?></h2>
+				<table class="form-table">
+					<tr>
+						<th scope="row"><label for="kdm_turnstile_site_key"><?php esc_html_e( 'Turnstile Site Key', 'telex-kdm-premium-form' ); ?></label></th>
+						<td><input type="text" id="kdm_turnstile_site_key" name="kdm_turnstile_site_key" value="<?php echo esc_attr( $ts_site_key ); ?>" class="regular-text" /></td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="kdm_turnstile_secret_key"><?php esc_html_e( 'Turnstile Secret Key', 'telex-kdm-premium-form' ); ?></label></th>
+						<td><input type="text" id="kdm_turnstile_secret_key" name="kdm_turnstile_secret_key" value="<?php echo esc_attr( $ts_secret ); ?>" class="regular-text" /></td>
+					</tr>
+				</table>
+				<h2><?php esc_html_e( 'Spam Protection', 'telex-kdm-premium-form' ); ?></h2>
+				<table class="form-table">
+					<tr>
+						<th scope="row"><label for="kdm_send_delay"><?php esc_html_e( 'Rate Limit (seconds)', 'telex-kdm-premium-form' ); ?></label></th>
+						<td>
+							<input type="number" id="kdm_send_delay" name="kdm_send_delay" value="<?php echo esc_attr( $send_delay ); ?>" class="small-text" min="0" step="1" />
+							<p class="description"><?php esc_html_e( 'Minimum seconds between submissions from the same IP address. Set to 0 to disable.', 'telex-kdm-premium-form' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="kdm_min_input_delay"><?php esc_html_e( 'Minimum Input Delay (seconds)', 'telex-kdm-premium-form' ); ?></label></th>
+						<td>
+							<input type="number" id="kdm_min_input_delay" name="kdm_min_input_delay" value="<?php echo esc_attr( $min_input_delay ); ?>" class="small-text" min="0" step="1" />
+							<p class="description"><?php esc_html_e( 'Submissions faster than this many seconds after page load are rejected as bot activity. Set to 0 to disable.', 'telex-kdm-premium-form' ); ?></p>
+						</td>
+					</tr>
+				</table>
+				<h2><?php esc_html_e( 'Logging', 'telex-kdm-premium-form' ); ?></h2>
+				<table class="form-table">
+					<tr>
+						<th scope="row"><label for="kdm_enable_logging"><?php esc_html_e( 'Enable Submission Logging', 'telex-kdm-premium-form' ); ?></label></th>
+						<td>
+							<input type="checkbox" id="kdm_enable_logging" name="kdm_enable_logging" value="1" <?php checked( $enable_logging ); ?> />
+							<p class="description"><?php esc_html_e( 'Log rejected and successful submissions to the PHP error log for monitoring and debugging. IP addresses are anonymized.', 'telex-kdm-premium-form' ); ?></p>
+						</td>
+					</tr>
+				</table>
+				<?php submit_button(); ?>
+			</form>
+		</div>
+		<?php
+	}
+}
+
+/**
+ * Helper: Anonymize an IP address for logging (strips last octet for IPv4, last 80 bits for IPv6).
+ */
+if ( ! function_exists( 'telex_kdm_anonymize_ip' ) ) {
+	function telex_kdm_anonymize_ip( $ip ) {
+		if ( strpos( $ip, ':' ) !== false ) {
+			// IPv6: zero out last 80 bits.
+			return preg_replace( '/:[0-9a-fA-F]{0,4}:[0-9a-fA-F]{0,4}:[0-9a-fA-F]{0,4}:[0-9a-fA-F]{0,4}:[0-9a-fA-F]{0,4}$/', ':0:0:0:0:0', $ip );
+		}
+		// IPv4: zero out last octet.
+		return preg_replace( '/\.\d+$/', '.0', $ip );
+	}
+}
+
+/**
+ * Helper: Log form events when logging is enabled.
+ */
+if ( ! function_exists( 'telex_kdm_log' ) ) {
+	function telex_kdm_log( $type, $message, $ip = '' ) {
+		if ( ! get_option( 'kdm_enable_logging', false ) ) {
+			return;
+		}
+		$anon_ip = $ip ? telex_kdm_anonymize_ip( $ip ) : 'unknown';
+		error_log( sprintf(
+			'[KDM Form][%s] %s | IP: %s',
+			strtoupper( $type ),
+			$message,
+			$anon_ip
+		) );
+	}
+}
+
+/**
+ * Helper: Strip newlines and carriage returns to prevent email header injection.
+ */
+if ( ! function_exists( 'telex_kdm_sanitize_header_value' ) ) {
+	function telex_kdm_sanitize_header_value( $value ) {
+		return preg_replace( '/[\r\n]/', '', $value );
+	}
+}
+
+/**
+ * Helper: Hash an IP with a daily rotating salt for rate-limit transient keys.
+ */
+if ( ! function_exists( 'telex_kdm_hash_ip' ) ) {
+	function telex_kdm_hash_ip( $ip ) {
+		$salt = wp_salt( 'nonce' ) . gmdate( 'Y-m-d' );
+		return hash( 'sha256', $ip . $salt );
+	}
+}
+
+/**
+ * Helper: Validate Origin/Referer against site URL.
+ */
+if ( ! function_exists( 'telex_kdm_validate_origin' ) ) {
+	function telex_kdm_validate_origin() {
+		$site_host = wp_parse_url( home_url(), PHP_URL_HOST );
+		$origin    = '';
+
+		if ( ! empty( $_SERVER['HTTP_ORIGIN'] ) ) {
+			$origin = wp_parse_url( sanitize_url( wp_unslash( $_SERVER['HTTP_ORIGIN'] ) ), PHP_URL_HOST );
+		} elseif ( ! empty( $_SERVER['HTTP_REFERER'] ) ) {
+			$origin = wp_parse_url( sanitize_url( wp_unslash( $_SERVER['HTTP_REFERER'] ) ), PHP_URL_HOST );
+		}
+
+		if ( empty( $origin ) ) {
+			return false;
+		}
+
+		return strtolower( $origin ) === strtolower( $site_host );
+	}
+}
+
+/**
+ * Helper: Extract block attributes from post content by form instance ID.
+ */
+if ( ! function_exists( 'telex_kdm_find_block_attributes' ) ) {
+	function telex_kdm_find_block_attributes( $post_id, $form_id ) {
+		$post = get_post( $post_id );
+		if ( ! $post || empty( $post->post_content ) ) {
+			return null;
+		}
+
+		$blocks = parse_blocks( $post->post_content );
+		return telex_kdm_search_blocks( $blocks, $form_id );
+	}
+}
+
+if ( ! function_exists( 'telex_kdm_search_blocks' ) ) {
+	function telex_kdm_search_blocks( $blocks, $form_id ) {
+		foreach ( $blocks as $block ) {
+			if (
+				'telex/block-telex-kdm-premium-form' === $block['blockName'] &&
+				isset( $block['attrs']['formInstanceId'] ) &&
+				$block['attrs']['formInstanceId'] === $form_id
+			) {
+				return $block['attrs'];
+			}
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$found = telex_kdm_search_blocks( $block['innerBlocks'], $form_id );
+				if ( $found ) {
+					return $found;
+				}
+			}
+		}
+		return null;
+	}
+}
+
+/**
+ * Generate and store a one-time submission token in a short-lived transient.
+ */
+if ( ! function_exists( 'telex_kdm_generate_submit_token' ) ) {
+	function telex_kdm_generate_submit_token() {
+		$token = wp_generate_password( 32, false );
+		set_transient( 'kdm_token_' . $token, '1', 600 ); // Valid for 10 minutes.
+		return $token;
+	}
+}
+
+/**
+ * Verify and consume a one-time submission token.
+ */
+if ( ! function_exists( 'telex_kdm_verify_submit_token' ) ) {
+	function telex_kdm_verify_submit_token( $token ) {
+		if ( empty( $token ) ) {
+			return false;
+		}
+		$key = 'kdm_token_' . sanitize_text_field( $token );
+		if ( get_transient( $key ) ) {
+			delete_transient( $key );
+			return true;
+		}
+		return false;
+	}
+}
+
+/**
+ * Field length constants.
+ */
+if ( ! defined( 'KDM_MAX_NAME_LENGTH' ) ) {
+	define( 'KDM_MAX_NAME_LENGTH', 100 );
+}
+if ( ! defined( 'KDM_MAX_EMAIL_LENGTH' ) ) {
+	define( 'KDM_MAX_EMAIL_LENGTH', 254 );
+}
+if ( ! defined( 'KDM_MAX_PHONE_LENGTH' ) ) {
+	define( 'KDM_MAX_PHONE_LENGTH', 30 );
+}
+if ( ! defined( 'KDM_MAX_MESSAGE_LENGTH' ) ) {
+	define( 'KDM_MAX_MESSAGE_LENGTH', 5000 );
+}
+
+/**
+ * AJAX handler for form submission.
+ */
+if ( ! function_exists( 'telex_kdm_premium_form_handle_submission' ) ) {
+	function telex_kdm_premium_form_handle_submission() {
+		$ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0' ) );
+
+		// Origin / Referer validation.
+		if ( ! telex_kdm_validate_origin() ) {
+			telex_kdm_log( 'blocked', 'Origin/Referer validation failed', $ip );
+			wp_send_json_error( array( 'message' => __( 'Invalid request origin. Please submit the form from the website.', 'telex-kdm-premium-form' ) ), 403 );
+		}
+
+		// Verify nonce.
+		if ( ! check_ajax_referer( 'kdm_form_nonce', 'nonce', false ) ) {
+			telex_kdm_log( 'blocked', 'Nonce verification failed', $ip );
+			wp_send_json_error( array( 'message' => __( 'Security verification failed. Please refresh the page and try again.', 'telex-kdm-premium-form' ) ), 403 );
+		}
+
+		// Verify one-time submission token (double-submit prevention).
+		$submit_token = isset( $_POST['_kdm_token'] ) ? sanitize_text_field( wp_unslash( $_POST['_kdm_token'] ) ) : '';
+		if ( ! telex_kdm_verify_submit_token( $submit_token ) ) {
+			telex_kdm_log( 'blocked', 'Duplicate or invalid submission token', $ip );
+			wp_send_json_error( array( 'message' => __( 'This form has already been submitted. Please refresh the page to submit again.', 'telex-kdm-premium-form' ) ), 403 );
+		}
+
+		// Honeypot check — the hidden field must be empty.
+		$honeypot = isset( $_POST['website_url'] ) ? sanitize_text_field( wp_unslash( $_POST['website_url'] ) ) : '';
+		if ( ! empty( $honeypot ) ) {
+			telex_kdm_log( 'spam', 'Honeypot field triggered', $ip );
+			// Silently fail with a generic success to not tip off bots.
+			wp_send_json_success( array( 'message' => __( 'Thank you! Your message has been sent successfully.', 'telex-kdm-premium-form' ) ) );
+		}
+
+		// Minimum input delay check — reject submissions that are too fast.
+		$min_input_delay = absint( get_option( 'kdm_min_input_delay', 3 ) );
+		if ( $min_input_delay > 0 ) {
+			$form_loaded_at = isset( $_POST['_kdm_loaded'] ) ? absint( $_POST['_kdm_loaded'] ) : 0;
+			$now            = time();
+			if ( $form_loaded_at <= 0 || ( $now - $form_loaded_at ) < $min_input_delay ) {
+				telex_kdm_log( 'spam', 'Minimum input delay not met (too fast)', $ip );
+				// Silently fail — bots won't know they were caught.
+				wp_send_json_success( array( 'message' => __( 'Thank you! Your message has been sent successfully.', 'telex-kdm-premium-form' ) ) );
+			}
+		}
+
+		// Rate limiting by hashed IP.
+		$send_delay = absint( get_option( 'kdm_send_delay', 30 ) );
+		if ( $send_delay > 0 ) {
+			$ip_hash       = telex_kdm_hash_ip( $ip );
+			$transient_key = 'kdm_rate_' . substr( $ip_hash, 0, 40 );
+			if ( get_transient( $transient_key ) ) {
+				telex_kdm_log( 'rate_limit', 'Rate limit exceeded', $ip );
+				wp_send_json_error( array(
+					'message' => sprintf(
+						/* translators: %d: number of seconds */
+						__( 'Please wait %d seconds before submitting again.', 'telex-kdm-premium-form' ),
+						$send_delay
+					),
+				), 429 );
+			}
+			set_transient( $transient_key, true, $send_delay );
+		}
+
+		// Turnstile verification.
+		$turnstile_secret = get_option( 'kdm_turnstile_secret_key', '' );
+		if ( ! empty( $turnstile_secret ) ) {
+			$turnstile_token = sanitize_text_field( wp_unslash( $_POST['cf-turnstile-response'] ?? '' ) );
+			if ( empty( $turnstile_token ) ) {
+				telex_kdm_log( 'blocked', 'Turnstile token missing', $ip );
+				wp_send_json_error( array( 'message' => __( 'Bot verification failed. Please complete the challenge.', 'telex-kdm-premium-form' ) ), 403 );
+			}
+			$verify_response = wp_remote_post( 'https://challenges.cloudflare.com/turnstile/v0/siteverify', array(
+				'body' => array(
+					'secret'   => $turnstile_secret,
+					'response' => $turnstile_token,
+					'remoteip' => $ip,
+				),
+			) );
+			if ( is_wp_error( $verify_response ) ) {
+				telex_kdm_log( 'error', 'Turnstile API request failed: ' . $verify_response->get_error_message(), $ip );
+				wp_send_json_error( array( 'message' => __( 'Verification service unavailable. Please try again.', 'telex-kdm-premium-form' ) ), 500 );
+			}
+			$verify_body = json_decode( wp_remote_retrieve_body( $verify_response ), true );
+			if ( empty( $verify_body['success'] ) ) {
+				telex_kdm_log( 'blocked', 'Turnstile verification failed', $ip );
+				wp_send_json_error( array( 'message' => __( 'Bot verification failed.', 'telex-kdm-premium-form' ) ), 403 );
+			}
+		}
+
+		// Sanitize form fields.
+		$first_name = sanitize_text_field( wp_unslash( $_POST['first_name'] ?? '' ) );
+		$last_name  = sanitize_text_field( wp_unslash( $_POST['last_name'] ?? '' ) );
+		$email      = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
+		$phone      = sanitize_text_field( wp_unslash( $_POST['phone'] ?? '' ) );
+		$message    = sanitize_textarea_field( wp_unslash( $_POST['message'] ?? '' ) );
+
+		// Enforce length limits.
+		if ( mb_strlen( $first_name ) > KDM_MAX_NAME_LENGTH ) {
+			$first_name = mb_substr( $first_name, 0, KDM_MAX_NAME_LENGTH );
+		}
+		if ( mb_strlen( $last_name ) > KDM_MAX_NAME_LENGTH ) {
+			$last_name = mb_substr( $last_name, 0, KDM_MAX_NAME_LENGTH );
+		}
+		if ( mb_strlen( $email ) > KDM_MAX_EMAIL_LENGTH ) {
+			wp_send_json_error( array( 'message' => __( 'Email address is too long.', 'telex-kdm-premium-form' ) ), 400 );
+		}
+		if ( mb_strlen( $phone ) > KDM_MAX_PHONE_LENGTH ) {
+			$phone = mb_substr( $phone, 0, KDM_MAX_PHONE_LENGTH );
+		}
+		if ( mb_strlen( $message ) > KDM_MAX_MESSAGE_LENGTH ) {
+			wp_send_json_error( array( 'message' => sprintf(
+				/* translators: %d: maximum character count */
+				__( 'Message is too long. Maximum %d characters allowed.', 'telex-kdm-premium-form' ),
+				KDM_MAX_MESSAGE_LENGTH
+			) ), 400 );
+		}
+
+		// Validate required fields.
+		if ( empty( $first_name ) || empty( $last_name ) || empty( $email ) || empty( $message ) ) {
+			telex_kdm_log( 'validation', 'Missing required fields', $ip );
+			wp_send_json_error( array( 'message' => __( 'Please fill in all required fields.', 'telex-kdm-premium-form' ) ), 400 );
+		}
+
+		if ( ! is_email( $email ) ) {
+			telex_kdm_log( 'validation', 'Invalid email format', $ip );
+			wp_send_json_error( array( 'message' => __( 'Please provide a valid email address.', 'telex-kdm-premium-form' ) ), 400 );
+		}
+
+		// Resolve notification email and success message from block attributes (server-side only).
+		$to_email        = '';
+		$success_message = '';
+		$post_id         = isset( $_POST['_kdm_post_id'] ) ? absint( $_POST['_kdm_post_id'] ) : 0;
+		$form_id         = isset( $_POST['_kdm_form_id'] ) ? sanitize_text_field( wp_unslash( $_POST['_kdm_form_id'] ) ) : '';
+
+		if ( $post_id > 0 && ! empty( $form_id ) ) {
+			$block_attrs = telex_kdm_find_block_attributes( $post_id, $form_id );
+			if ( $block_attrs ) {
+				$to_email        = ! empty( $block_attrs['notificationEmail'] ) ? sanitize_email( $block_attrs['notificationEmail'] ) : '';
+				$success_message = ! empty( $block_attrs['successMessage'] ) ? sanitize_text_field( $block_attrs['successMessage'] ) : '';
+			}
+		}
+
+		// Fallback to admin email if not set or invalid.
+		if ( empty( $to_email ) || ! is_email( $to_email ) ) {
+			$to_email = get_option( 'admin_email' );
+		}
+
+		if ( empty( $success_message ) ) {
+			$success_message = __( 'Thank you! Your message has been sent successfully.', 'telex-kdm-premium-form' );
+		}
+
+		// Sanitize values used in email headers to prevent header injection.
+		$safe_first_name = telex_kdm_sanitize_header_value( $first_name );
+		$safe_last_name  = telex_kdm_sanitize_header_value( $last_name );
+		$safe_email      = telex_kdm_sanitize_header_value( $email );
+
+		// Build the email.
+		$subject = sprintf(
+			/* translators: %s: sender's full name */
+			__( 'New Form Submission from %s', 'telex-kdm-premium-form' ),
+			$safe_first_name . ' ' . $safe_last_name
+		);
+
+		$body  = sprintf( __( 'Name: %s', 'telex-kdm-premium-form' ), $first_name . ' ' . $last_name ) . "\n";
+		$body .= sprintf( __( 'Email: %s', 'telex-kdm-premium-form' ), $email ) . "\n";
+		if ( ! empty( $phone ) ) {
+			$body .= sprintf( __( 'Phone: %s', 'telex-kdm-premium-form' ), $phone ) . "\n";
+		}
+		$body .= "\n" . sprintf( __( 'Message:%s%s', 'telex-kdm-premium-form' ), "\n", $message );
+
+		$headers = array(
+			'Content-Type: text/plain; charset=UTF-8',
+			'Reply-To: ' . $safe_first_name . ' ' . $safe_last_name . ' <' . $safe_email . '>',
+		);
+
+		$sent = wp_mail( $to_email, $subject, $body, $headers );
+
+		if ( $sent ) {
+			telex_kdm_log( 'success', 'Form submitted successfully by ' . $safe_email, $ip );
+			wp_send_json_success( array( 'message' => $success_message ) );
+		} else {
+			telex_kdm_log( 'error', 'wp_mail() failed for submission from ' . $safe_email, $ip );
+			wp_send_json_error( array( 'message' => __( 'Failed to send the message. Please try again later.', 'telex-kdm-premium-form' ) ), 500 );
+		}
+	}
+}
+add_action( 'wp_ajax_kdm_form_submit', 'telex_kdm_premium_form_handle_submission' );
+add_action( 'wp_ajax_nopriv_kdm_form_submit', 'telex_kdm_premium_form_handle_submission' );
+]]></content>
+  </file>
+  <file path="src/block.json">
+    <description>Block metadata including attributes for layout, heading, description, notification email, and success message.</description>
+    <content><![CDATA[
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "telex/block-telex-kdm-premium-form",
+	"version": "0.1.0",
+	"title": "KDM Premium Vibrant Form",
+	"category": "widgets",
+	"icon": "email",
+	"description": "A premium dark-themed contact form with Cloudflare Turnstile, honeypot, rate limiting, and SMTP support.",
+	"example": {
+		"attributes": {
+			"layoutType": "compact",
+			"heading": "Speak with a Local SEO Expert",
+			"subheading": "Fill out the form and we will get back to you within 24 hours.",
+			"notificationEmail": "admin@example.com",
+			"successMessage": "Thank you! Your message has been sent successfully."
+		}
+	},
+	"attributes": {
+		"formInstanceId": {
+			"type": "string",
+			"default": ""
+		},
+		"layoutType": {
+			"type": "string",
+			"default": "compact"
+		},
+		"heading": {
+			"type": "string",
+			"default": "Speak with a Local SEO Expert"
+		},
+		"subheading": {
+			"type": "string",
+			"default": "Fill out the form and we will get back to you within 24 hours."
+		},
+		"notificationEmail": {
+			"type": "string",
+			"default": ""
+		},
+		"successMessage": {
+			"type": "string",
+			"default": "Thank you! Your message has been sent successfully."
+		},
+		"labelFirstName": {
+			"type": "string",
+			"default": "First Name"
+		},
+		"labelLastName": {
+			"type": "string",
+			"default": "Last Name"
+		},
+		"labelEmail": {
+			"type": "string",
+			"default": "Email"
+		},
+		"labelPhone": {
+			"type": "string",
+			"default": "Phone"
+		},
+		"labelMessage": {
+			"type": "string",
+			"default": "Message"
+		},
+		"placeholderFirstName": {
+			"type": "string",
+			"default": "John"
+		},
+		"placeholderLastName": {
+			"type": "string",
+			"default": "Doe"
+		},
+		"placeholderEmail": {
+			"type": "string",
+			"default": "john@example.com"
+		},
+		"placeholderPhone": {
+			"type": "string",
+			"default": "+1 555 123 4567"
+		},
+		"placeholderMessage": {
+			"type": "string",
+			"default": "Your message…"
+		},
+		"buttonText": {
+			"type": "string",
+			"default": "Send Message →"
+		},
+		"headingTypography": {
+			"type": "object",
+			"default": {}
+		},
+		"subheadingTypography": {
+			"type": "object",
+			"default": {}
+		},
+		"labelFirstNameTypography": {
+			"type": "object",
+			"default": {}
+		},
+		"labelLastNameTypography": {
+			"type": "object",
+			"default": {}
+		},
+		"labelEmailTypography": {
+			"type": "object",
+			"default": {}
+		},
+		"labelPhoneTypography": {
+			"type": "object",
+			"default": {}
+		},
+		"labelMessageTypography": {
+			"type": "object",
+			"default": {}
+		},
+		"inputFirstNameTypography": {
+			"type": "object",
+			"default": {}
+		},
+		"inputLastNameTypography": {
+			"type": "object",
+			"default": {}
+		},
+		"inputEmailTypography": {
+			"type": "object",
+			"default": {}
+		},
+		"inputPhoneTypography": {
+			"type": "object",
+			"default": {}
+		},
+		"inputMessageTypography": {
+			"type": "object",
+			"default": {}
+		},
+		"buttonTypography": {
+			"type": "object",
+			"default": {}
+		}
+	},
+	"supports": {
+		"html": false,
+		"anchor": true,
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"color": {
+			"background": true,
+			"text": true,
+			"gradients": true
+		}
+	},
+	"textdomain": "telex-kdm-premium-form",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"viewScript": "file:./view.js",
+	"render": "file:./render.php"
+}
+]]></content>
+  </file>
+  <file path="src/index.js">
+    <description>Block registration entry point.</description>
+    <content><![CDATA[
+import { registerBlockType } from '@wordpress/blocks';
+import './style.scss';
+import Edit from './edit';
+import metadata from './block.json';
+
+registerBlockType( metadata.name, {
+	edit: Edit,
+} );
+]]></content>
+  </file>
+  <file path="src/edit.js">
+    <description>Editor component with full form preview and Inspector Controls for layout, email, and success message.</description>
+    <content><![CDATA[
+import { __ } from '@wordpress/i18n';
+import { useEffect } from '@wordpress/element';
+import {
+	useBlockProps,
+	InspectorControls,
+	RichText,
+} from '@wordpress/block-editor';
+import {
+	PanelBody,
+	SelectControl,
+	TextControl,
+	TextareaControl,
+} from '@wordpress/components';
+import TypographyPanel, { typographyToStyle } from './typography-panel';
+import './editor.scss';
+
+export default function Edit( { attributes, setAttributes, clientId } ) {
+	const {
+		formInstanceId,
+		layoutType,
+		heading,
+		subheading,
+		notificationEmail,
+		successMessage,
+		labelFirstName,
+		labelLastName,
+		labelEmail,
+		labelPhone,
+		labelMessage,
+		placeholderFirstName,
+		placeholderLastName,
+		placeholderEmail,
+		placeholderPhone,
+		placeholderMessage,
+		buttonText,
+		headingTypography,
+		subheadingTypography,
+		labelFirstNameTypography,
+		labelLastNameTypography,
+		labelEmailTypography,
+		labelPhoneTypography,
+		labelMessageTypography,
+		inputFirstNameTypography,
+		inputLastNameTypography,
+		inputEmailTypography,
+		inputPhoneTypography,
+		inputMessageTypography,
+		buttonTypography,
+	} = attributes;
+
+	// Generate a stable form instance ID for server-side attribute resolution.
+	useEffect( () => {
+		if ( ! formInstanceId ) {
+			setAttributes( { formInstanceId: clientId } );
+		}
+	}, [ formInstanceId, clientId, setAttributes ] );
+
+	const blockProps = useBlockProps( {
+		className: `kdm-lp-form-box kdm-layout-${ layoutType }`,
+	} );
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody
+					title={ __( 'Layout', 'telex-kdm-premium-form' ) }
+					initialOpen={ true }
+				>
+					<SelectControl
+						label={ __( 'Layout Type', 'telex-kdm-premium-form' ) }
+						value={ layoutType }
+						options={ [
+							{
+								label: __( 'Compact Box (Sidebar)', 'telex-kdm-premium-form' ),
+								value: 'compact',
+							},
+							{
+								label: __( 'Wide Row (Footer)', 'telex-kdm-premium-form' ),
+								value: 'wide',
+							},
+						] }
+						onChange={ ( value ) =>
+							setAttributes( { layoutType: value } )
+						}
+					/>
+				</PanelBody>
+				<PanelBody
+					title={ __( 'Form Settings', 'telex-kdm-premium-form' ) }
+					initialOpen={ true }
+				>
+					<TextControl
+						label={ __( 'Notification Email', 'telex-kdm-premium-form' ) }
+						help={ __( 'Submissions will be sent to this email. Leave empty to use admin email.', 'telex-kdm-premium-form' ) }
+						value={ notificationEmail }
+						onChange={ ( value ) =>
+							setAttributes( { notificationEmail: value } )
+						}
+						type="email"
+					/>
+					<TextareaControl
+						label={ __( 'Success Message', 'telex-kdm-premium-form' ) }
+						help={ __( 'Message shown after a successful submission.', 'telex-kdm-premium-form' ) }
+						value={ successMessage }
+						onChange={ ( value ) =>
+							setAttributes( { successMessage: value } )
+						}
+					/>
+				</PanelBody>
+				<PanelBody
+					title={ __( 'Field Placeholders', 'telex-kdm-premium-form' ) }
+					initialOpen={ false }
+				>
+					<TextControl
+						label={ __( 'First Name Placeholder', 'telex-kdm-premium-form' ) }
+						value={ placeholderFirstName }
+						onChange={ ( value ) =>
+							setAttributes( { placeholderFirstName: value } )
+						}
+					/>
+					<TextControl
+						label={ __( 'Last Name Placeholder', 'telex-kdm-premium-form' ) }
+						value={ placeholderLastName }
+						onChange={ ( value ) =>
+							setAttributes( { placeholderLastName: value } )
+						}
+					/>
+					<TextControl
+						label={ __( 'Email Placeholder', 'telex-kdm-premium-form' ) }
+						value={ placeholderEmail }
+						onChange={ ( value ) =>
+							setAttributes( { placeholderEmail: value } )
+						}
+					/>
+					<TextControl
+						label={ __( 'Phone Placeholder', 'telex-kdm-premium-form' ) }
+						value={ placeholderPhone }
+						onChange={ ( value ) =>
+							setAttributes( { placeholderPhone: value } )
+						}
+					/>
+					<TextControl
+						label={ __( 'Message Placeholder', 'telex-kdm-premium-form' ) }
+						value={ placeholderMessage }
+						onChange={ ( value ) =>
+							setAttributes( { placeholderMessage: value } )
+						}
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<InspectorControls group="styles">
+				<TypographyPanel
+					label={ __( 'Heading Typography', 'telex-kdm-premium-form' ) }
+					value={ headingTypography }
+					onChange={ ( val ) => setAttributes( { headingTypography: val } ) }
+				/>
+				<TypographyPanel
+					label={ __( 'Subheading Typography', 'telex-kdm-premium-form' ) }
+					value={ subheadingTypography }
+					onChange={ ( val ) => setAttributes( { subheadingTypography: val } ) }
+				/>
+				<TypographyPanel
+					label={ __( 'First Name — Label', 'telex-kdm-premium-form' ) }
+					value={ labelFirstNameTypography }
+					onChange={ ( val ) => setAttributes( { labelFirstNameTypography: val } ) }
+				/>
+				<TypographyPanel
+					label={ __( 'First Name — Input', 'telex-kdm-premium-form' ) }
+					value={ inputFirstNameTypography }
+					onChange={ ( val ) => setAttributes( { inputFirstNameTypography: val } ) }
+				/>
+				<TypographyPanel
+					label={ __( 'Last Name — Label', 'telex-kdm-premium-form' ) }
+					value={ labelLastNameTypography }
+					onChange={ ( val ) => setAttributes( { labelLastNameTypography: val } ) }
+				/>
+				<TypographyPanel
+					label={ __( 'Last Name — Input', 'telex-kdm-premium-form' ) }
+					value={ inputLastNameTypography }
+					onChange={ ( val ) => setAttributes( { inputLastNameTypography: val } ) }
+				/>
+				<TypographyPanel
+					label={ __( 'Email — Label', 'telex-kdm-premium-form' ) }
+					value={ labelEmailTypography }
+					onChange={ ( val ) => setAttributes( { labelEmailTypography: val } ) }
+				/>
+				<TypographyPanel
+					label={ __( 'Email — Input', 'telex-kdm-premium-form' ) }
+					value={ inputEmailTypography }
+					onChange={ ( val ) => setAttributes( { inputEmailTypography: val } ) }
+				/>
+				<TypographyPanel
+					label={ __( 'Phone — Label', 'telex-kdm-premium-form' ) }
+					value={ labelPhoneTypography }
+					onChange={ ( val ) => setAttributes( { labelPhoneTypography: val } ) }
+				/>
+				<TypographyPanel
+					label={ __( 'Phone — Input', 'telex-kdm-premium-form' ) }
+					value={ inputPhoneTypography }
+					onChange={ ( val ) => setAttributes( { inputPhoneTypography: val } ) }
+				/>
+				<TypographyPanel
+					label={ __( 'Message — Label', 'telex-kdm-premium-form' ) }
+					value={ labelMessageTypography }
+					onChange={ ( val ) => setAttributes( { labelMessageTypography: val } ) }
+				/>
+				<TypographyPanel
+					label={ __( 'Message — Input', 'telex-kdm-premium-form' ) }
+					value={ inputMessageTypography }
+					onChange={ ( val ) => setAttributes( { inputMessageTypography: val } ) }
+				/>
+				<TypographyPanel
+					label={ __( 'Button Typography', 'telex-kdm-premium-form' ) }
+					value={ buttonTypography }
+					onChange={ ( val ) => setAttributes( { buttonTypography: val } ) }
+				/>
+			</InspectorControls>
+			<div { ...blockProps }>
+				<div className="kdm-form-header">
+					<RichText
+						tagName="h3"
+						style={ typographyToStyle( headingTypography ) }
+						value={ heading }
+						onChange={ ( value ) =>
+							setAttributes( { heading: value } )
+						}
+						placeholder={ __( 'Form Heading…', 'telex-kdm-premium-form' ) }
+					/>
+					<RichText
+						tagName="p"
+						className="kdm-form-subheading"
+						style={ typographyToStyle( subheadingTypography ) }
+						value={ subheading }
+						onChange={ ( value ) =>
+							setAttributes( { subheading: value } )
+						}
+						placeholder={ __( 'Subheading text…', 'telex-kdm-premium-form' ) }
+					/>
+				</div>
+				<div className="kdm-form-preview">
+					<div className="kdm-lp-form-row">
+						<div className="kdm-lp-form-group">
+							<RichText
+								tagName="label"
+								style={ typographyToStyle( labelFirstNameTypography ) }
+								value={ labelFirstName }
+								onChange={ ( value ) =>
+									setAttributes( { labelFirstName: value } )
+								}
+								placeholder={ __( 'Label…', 'telex-kdm-premium-form' ) }
+								allowedFormats={ [ 'core/bold', 'core/italic' ] }
+							/>
+							<input
+								type="text"
+								tabIndex="-1"
+								readOnly
+								placeholder={ placeholderFirstName }
+								style={ typographyToStyle( inputFirstNameTypography ) }
+							/>
+						</div>
+						<div className="kdm-lp-form-group">
+							<RichText
+								tagName="label"
+								style={ typographyToStyle( labelLastNameTypography ) }
+								value={ labelLastName }
+								onChange={ ( value ) =>
+									setAttributes( { labelLastName: value } )
+								}
+								placeholder={ __( 'Label…', 'telex-kdm-premium-form' ) }
+								allowedFormats={ [ 'core/bold', 'core/italic' ] }
+							/>
+							<input
+								type="text"
+								tabIndex="-1"
+								readOnly
+								placeholder={ placeholderLastName }
+								style={ typographyToStyle( inputLastNameTypography ) }
+							/>
+						</div>
+					</div>
+					<div className="kdm-lp-form-row">
+						<div className="kdm-lp-form-group">
+							<RichText
+								tagName="label"
+								style={ typographyToStyle( labelEmailTypography ) }
+								value={ labelEmail }
+								onChange={ ( value ) =>
+									setAttributes( { labelEmail: value } )
+								}
+								placeholder={ __( 'Label…', 'telex-kdm-premium-form' ) }
+								allowedFormats={ [ 'core/bold', 'core/italic' ] }
+							/>
+							<input
+								type="email"
+								tabIndex="-1"
+								readOnly
+								placeholder={ placeholderEmail }
+								style={ typographyToStyle( inputEmailTypography ) }
+							/>
+						</div>
+						<div className="kdm-lp-form-group">
+							<RichText
+								tagName="label"
+								style={ typographyToStyle( labelPhoneTypography ) }
+								value={ labelPhone }
+								onChange={ ( value ) =>
+									setAttributes( { labelPhone: value } )
+								}
+								placeholder={ __( 'Label…', 'telex-kdm-premium-form' ) }
+								allowedFormats={ [ 'core/bold', 'core/italic' ] }
+							/>
+							<input
+								type="tel"
+								tabIndex="-1"
+								readOnly
+								placeholder={ placeholderPhone }
+								style={ typographyToStyle( inputPhoneTypography ) }
+							/>
+						</div>
+					</div>
+					<div className="kdm-lp-form-group">
+						<RichText
+							tagName="label"
+							style={ typographyToStyle( labelMessageTypography ) }
+							value={ labelMessage }
+							onChange={ ( value ) =>
+								setAttributes( { labelMessage: value } )
+							}
+							placeholder={ __( 'Label…', 'telex-kdm-premium-form' ) }
+							allowedFormats={ [ 'core/bold', 'core/italic' ] }
+						/>
+						<textarea
+							tabIndex="-1"
+							readOnly
+							rows="3"
+							placeholder={ placeholderMessage }
+							style={ typographyToStyle( inputMessageTypography ) }
+						></textarea>
+					</div>
+					<div className="kdm-turnstile-placeholder">
+						<span>{ __( '🛡️ Turnstile widget appears here on the front end', 'telex-kdm-premium-form' ) }</span>
+					</div>
+					<RichText
+						tagName="button"
+						className="kdm-lp-form-submit"
+						style={ typographyToStyle( buttonTypography ) }
+						value={ buttonText }
+						onChange={ ( value ) =>
+							setAttributes( { buttonText: value } )
+						}
+						placeholder={ __( 'Button text…', 'telex-kdm-premium-form' ) }
+						allowedFormats={ [ 'core/bold', 'core/italic' ] }
+					/>
+				</div>
+			</div>
+		</>
+	);
+}
+]]></content>
+  </file>
+  <file path="src/save.js">
+    <description>Save returns null because this is a dynamic block rendered via render.php.</description>
+    <content><![CDATA[
+]]></content>
+  </file>
+  <file path="src/render.php">
+    <description>Server-side render callback that outputs the full form HTML with honeypot, Turnstile widget, and data attributes for JS.</description>
+    <content><![CDATA[<?php
+/**
+ * Dynamic render callback for the KDM Premium Vibrant Form block.
+ *
+ * @var array    $attributes Block attributes.
+ * @var string   $content    Block default content.
+ * @var WP_Block $block      Block instance.
+ */
+
+if ( ! function_exists( 'telex_kdm_typography_to_inline_style' ) ) {
+	function telex_kdm_typography_to_inline_style( $typo ) {
+		if ( empty( $typo ) || ! is_array( $typo ) ) {
+			return '';
+		}
+		$map = array(
+			'fontFamily'      => 'font-family',
+			'fontSize'        => 'font-size',
+			'fontWeight'      => 'font-weight',
+			'fontStyle'       => 'font-style',
+			'lineHeight'      => 'line-height',
+			'letterSpacing'   => 'letter-spacing',
+			'textTransform'   => 'text-transform',
+			'textDecoration'  => 'text-decoration',
+		);
+		$parts = array();
+		foreach ( $map as $attr_key => $css_prop ) {
+			if ( ! empty( $typo[ $attr_key ] ) ) {
+				$parts[] = $css_prop . ':' . esc_attr( $typo[ $attr_key ] );
+			}
+		}
+		return implode( ';', $parts );
+	}
+}
+
+$layout_type        = ! empty( $attributes['layoutType'] ) ? sanitize_text_field( $attributes['layoutType'] ) : 'compact';
+$heading            = ! empty( $attributes['heading'] ) ? wp_kses_post( $attributes['heading'] ) : '';
+$subheading         = ! empty( $attributes['subheading'] ) ? wp_kses_post( $attributes['subheading'] ) : '';
+$notification_email = ! empty( $attributes['notificationEmail'] ) ? sanitize_email( $attributes['notificationEmail'] ) : '';
+$success_message    = ! empty( $attributes['successMessage'] ) ? esc_attr( $attributes['successMessage'] ) : esc_attr__( 'Thank you! Your message has been sent successfully.', 'telex-kdm-premium-form' );
+$form_instance_id   = ! empty( $attributes['formInstanceId'] ) ? sanitize_text_field( $attributes['formInstanceId'] ) : '';
+$turnstile_site_key = get_option( 'kdm_turnstile_site_key', '' );
+
+// Generate a one-time submission token for double-submit prevention.
+$submit_token = '';
+if ( function_exists( 'telex_kdm_generate_submit_token' ) ) {
+	$submit_token = telex_kdm_generate_submit_token();
+}
+
+// Resolve the current post ID for server-side attribute lookup.
+$current_post_id = 0;
+if ( isset( $block ) && is_object( $block ) && ! empty( $block->context['postId'] ) ) {
+	$current_post_id = absint( $block->context['postId'] );
+}
+if ( ! $current_post_id ) {
+	$current_post_id = get_the_ID() ? absint( get_the_ID() ) : 0;
+}
+
+$label_first_name       = ! empty( $attributes['labelFirstName'] ) ? wp_kses_post( $attributes['labelFirstName'] ) : esc_html__( 'First Name', 'telex-kdm-premium-form' );
+$label_last_name        = ! empty( $attributes['labelLastName'] ) ? wp_kses_post( $attributes['labelLastName'] ) : esc_html__( 'Last Name', 'telex-kdm-premium-form' );
+$label_email            = ! empty( $attributes['labelEmail'] ) ? wp_kses_post( $attributes['labelEmail'] ) : esc_html__( 'Email', 'telex-kdm-premium-form' );
+$label_phone            = ! empty( $attributes['labelPhone'] ) ? wp_kses_post( $attributes['labelPhone'] ) : esc_html__( 'Phone', 'telex-kdm-premium-form' );
+$label_message          = ! empty( $attributes['labelMessage'] ) ? wp_kses_post( $attributes['labelMessage'] ) : esc_html__( 'Message', 'telex-kdm-premium-form' );
+$placeholder_first_name = ! empty( $attributes['placeholderFirstName'] ) ? esc_attr( $attributes['placeholderFirstName'] ) : '';
+$placeholder_last_name  = ! empty( $attributes['placeholderLastName'] ) ? esc_attr( $attributes['placeholderLastName'] ) : '';
+$placeholder_email      = ! empty( $attributes['placeholderEmail'] ) ? esc_attr( $attributes['placeholderEmail'] ) : '';
+$placeholder_phone      = ! empty( $attributes['placeholderPhone'] ) ? esc_attr( $attributes['placeholderPhone'] ) : '';
+$placeholder_message    = ! empty( $attributes['placeholderMessage'] ) ? esc_attr( $attributes['placeholderMessage'] ) : '';
+$button_text            = ! empty( $attributes['buttonText'] ) ? wp_kses_post( $attributes['buttonText'] ) : esc_html__( 'Send Message →', 'telex-kdm-premium-form' );
+
+// Field length constants.
+$max_name    = defined( 'KDM_MAX_NAME_LENGTH' ) ? KDM_MAX_NAME_LENGTH : 100;
+$max_email   = defined( 'KDM_MAX_EMAIL_LENGTH' ) ? KDM_MAX_EMAIL_LENGTH : 254;
+$max_phone   = defined( 'KDM_MAX_PHONE_LENGTH' ) ? KDM_MAX_PHONE_LENGTH : 30;
+$max_message = defined( 'KDM_MAX_MESSAGE_LENGTH' ) ? KDM_MAX_MESSAGE_LENGTH : 5000;
+
+// Typography styles.
+$heading_style          = telex_kdm_typography_to_inline_style( $attributes['headingTypography'] ?? array() );
+$subheading_style       = telex_kdm_typography_to_inline_style( $attributes['subheadingTypography'] ?? array() );
+$label_fn_style         = telex_kdm_typography_to_inline_style( $attributes['labelFirstNameTypography'] ?? array() );
+$label_ln_style         = telex_kdm_typography_to_inline_style( $attributes['labelLastNameTypography'] ?? array() );
+$label_em_style         = telex_kdm_typography_to_inline_style( $attributes['labelEmailTypography'] ?? array() );
+$label_ph_style         = telex_kdm_typography_to_inline_style( $attributes['labelPhoneTypography'] ?? array() );
+$label_mg_style         = telex_kdm_typography_to_inline_style( $attributes['labelMessageTypography'] ?? array() );
+$input_fn_style         = telex_kdm_typography_to_inline_style( $attributes['inputFirstNameTypography'] ?? array() );
+$input_ln_style         = telex_kdm_typography_to_inline_style( $attributes['inputLastNameTypography'] ?? array() );
+$input_em_style         = telex_kdm_typography_to_inline_style( $attributes['inputEmailTypography'] ?? array() );
+$input_ph_style         = telex_kdm_typography_to_inline_style( $attributes['inputPhoneTypography'] ?? array() );
+$input_mg_style         = telex_kdm_typography_to_inline_style( $attributes['inputMessageTypography'] ?? array() );
+$button_style           = telex_kdm_typography_to_inline_style( $attributes['buttonTypography'] ?? array() );
+
+$wrapper_attributes = get_block_wrapper_attributes( array(
+	'class'                => 'kdm-lp-form-box kdm-layout-' . esc_attr( $layout_type ),
+	'data-success-message' => $success_message,
+) );
+
+$uid_fn = esc_attr( wp_unique_id( 'kdm-fn-' ) );
+$uid_ln = esc_attr( wp_unique_id( 'kdm-ln-' ) );
+$uid_em = esc_attr( wp_unique_id( 'kdm-em-' ) );
+$uid_ph = esc_attr( wp_unique_id( 'kdm-ph-' ) );
+$uid_mg = esc_attr( wp_unique_id( 'kdm-mg-' ) );
+?>
+<div <?php echo $wrapper_attributes; ?>>
+	<?php if ( ! empty( $heading ) ) : ?>
+		<h3<?php echo $heading_style ? ' style="' . esc_attr( $heading_style ) . '"' : ''; ?>><?php echo $heading; ?></h3>
+	<?php endif; ?>
+	<?php if ( ! empty( $subheading ) ) : ?>
+		<p class="kdm-form-subheading"<?php echo $subheading_style ? ' style="' . esc_attr( $subheading_style ) . '"' : ''; ?>><?php echo $subheading; ?></p>
+	<?php endif; ?>
+	<form class="kdm-ajax-form" novalidate>
+		<input type="hidden" name="_kdm_post_id" value="<?php echo esc_attr( $current_post_id ); ?>" />
+		<input type="hidden" name="_kdm_form_id" value="<?php echo esc_attr( $form_instance_id ); ?>" />
+		<input type="hidden" name="_kdm_loaded" value="" />
+		<input type="hidden" name="_kdm_token" value="<?php echo esc_attr( $submit_token ); ?>" />
+		<div style="position:absolute;left:-9999px;top:-9999px;height:0;width:0;overflow:hidden;" aria-hidden="true" tabindex="-1">
+			<label for="<?php echo esc_attr( wp_unique_id( 'kdm-hp-' ) ); ?>"><?php esc_html_e( 'Leave this field empty', 'telex-kdm-premium-form' ); ?></label>
+			<input type="text" name="website_url" id="<?php echo esc_attr( wp_unique_id( 'kdm-hp-' ) ); ?>" value="" tabindex="-1" autocomplete="off" />
+		</div>
+		<div class="kdm-lp-form-row">
+			<div class="kdm-lp-form-group">
+				<label for="<?php echo $uid_fn; ?>"<?php echo $label_fn_style ? ' style="' . esc_attr( $label_fn_style ) . '"' : ''; ?>><?php echo $label_first_name; ?></label>
+				<input type="text" name="first_name" id="<?php echo $uid_fn; ?>" placeholder="<?php echo $placeholder_first_name; ?>" required maxlength="<?php echo esc_attr( $max_name ); ?>"<?php echo $input_fn_style ? ' style="' . esc_attr( $input_fn_style ) . '"' : ''; ?> />
+			</div>
+			<div class="kdm-lp-form-group">
+				<label for="<?php echo $uid_ln; ?>"<?php echo $label_ln_style ? ' style="' . esc_attr( $label_ln_style ) . '"' : ''; ?>><?php echo $label_last_name; ?></label>
+				<input type="text" name="last_name" id="<?php echo $uid_ln; ?>" placeholder="<?php echo $placeholder_last_name; ?>" required maxlength="<?php echo esc_attr( $max_name ); ?>"<?php echo $input_ln_style ? ' style="' . esc_attr( $input_ln_style ) . '"' : ''; ?> />
+			</div>
+		</div>
+		<div class="kdm-lp-form-row">
+			<div class="kdm-lp-form-group">
+				<label for="<?php echo $uid_em; ?>"<?php echo $label_em_style ? ' style="' . esc_attr( $label_em_style ) . '"' : ''; ?>><?php echo $label_email; ?></label>
+				<input type="email" name="email" id="<?php echo $uid_em; ?>" placeholder="<?php echo $placeholder_email; ?>" required maxlength="<?php echo esc_attr( $max_email ); ?>"<?php echo $input_em_style ? ' style="' . esc_attr( $input_em_style ) . '"' : ''; ?> />
+			</div>
+			<div class="kdm-lp-form-group">
+				<label for="<?php echo $uid_ph; ?>"<?php echo $label_ph_style ? ' style="' . esc_attr( $label_ph_style ) . '"' : ''; ?>><?php echo $label_phone; ?></label>
+				<input type="tel" name="phone" id="<?php echo $uid_ph; ?>" placeholder="<?php echo $placeholder_phone; ?>" maxlength="<?php echo esc_attr( $max_phone ); ?>"<?php echo $input_ph_style ? ' style="' . esc_attr( $input_ph_style ) . '"' : ''; ?> />
+			</div>
+		</div>
+		<div class="kdm-lp-form-group">
+			<label for="<?php echo $uid_mg; ?>"<?php echo $label_mg_style ? ' style="' . esc_attr( $label_mg_style ) . '"' : ''; ?>><?php echo $label_message; ?></label>
+			<textarea name="message" id="<?php echo $uid_mg; ?>" rows="4" placeholder="<?php echo $placeholder_message; ?>" required maxlength="<?php echo esc_attr( $max_message ); ?>"<?php echo $input_mg_style ? ' style="' . esc_attr( $input_mg_style ) . '"' : ''; ?>></textarea>
+		</div>
+		<?php if ( ! empty( $turnstile_site_key ) ) : ?>
+			<div class="kdm-turnstile-wrapper" style="margin: 16px 0;">
+				<div class="cf-turnstile" data-sitekey="<?php echo esc_attr( $turnstile_site_key ); ?>"></div>
+			</div>
+		<?php endif; ?>
+		<button type="submit" class="kdm-lp-form-submit"<?php echo $button_style ? ' style="' . esc_attr( $button_style ) . '"' : ''; ?>><?php echo $button_text; ?></button>
+		<div class="kdm-form-status" style="margin-top: 12px; display: none;" role="alert" aria-live="polite"></div>
+	</form>
+</div>
+]]></content>
+  </file>
+  <file path="src/style.scss">
+    <description>Shared styles for the form on both front end and editor, using the specified design tokens.</description>
+    <content><![CDATA[
+:root {
+	--kdm-darker: #080c10;
+	--kdm-teal: #00c9a7;
+	--kdm-gold: #f5a623;
+	--kdm-white: #ffffff;
+	--kdm-muted: #8b949e;
+	--kdm-card-bg: #161b22;
+	--kdm-border: rgba(255, 255, 255, 0.08);
+	--kdm-font-display: "Bebas Neue", sans-serif;
+	--kdm-font-body: "DM Sans", sans-serif;
+}
+
+.wp-block-telex-block-telex-kdm-premium-form {
+	font-family: var(--kdm-font-body);
+	box-sizing: border-box;
+
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	&.kdm-lp-form-box {
+		background: var(--kdm-card-bg);
+		border: 1px solid var(--kdm-border);
+		border-radius: 8px;
+		padding: 36px 32px;
+		max-width: 480px;
+
+		h3 {
+			font-size: 24px;
+			letter-spacing: 1px;
+			margin: 0 0 6px;
+			color: var(--kdm-white);
+			font-family: var(--kdm-font-display);
+			line-height: 1.2;
+		}
+
+		.kdm-form-subheading {
+			font-size: 14px;
+			color: var(--kdm-muted);
+			margin: 0 0 24px;
+			line-height: 1.5;
+		}
+	}
+
+	&.kdm-layout-wide {
+		max-width: 100%;
+
+		.kdm-form-preview,
+		.kdm-ajax-form {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 16px;
+			align-items: start;
+
+			.kdm-lp-form-row {
+				grid-column: 1 / -1;
+			}
+
+			.kdm-lp-form-group:last-of-type {
+				grid-column: 1 / -1;
+			}
+
+			.kdm-lp-form-submit {
+				grid-column: 1 / -1;
+			}
+
+			.kdm-turnstile-wrapper {
+				grid-column: 1 / -1;
+			}
+
+			.kdm-form-status {
+				grid-column: 1 / -1;
+			}
+		}
+	}
+
+	.kdm-lp-form-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 12px;
+		margin-bottom: 12px;
+	}
+
+	.kdm-lp-form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		margin-bottom: 12px;
+
+		label {
+			font-size: 12px;
+			font-weight: 500;
+			color: var(--kdm-muted);
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		input,
+		textarea {
+			background: rgba(255, 255, 255, 0.05);
+			border: 1px solid var(--kdm-border);
+			border-radius: 4px;
+			padding: 10px 14px;
+			color: var(--kdm-white);
+			font-family: var(--kdm-font-body);
+			font-size: 14px;
+			transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+			&::placeholder {
+				color: var(--kdm-muted);
+				opacity: 0.6;
+			}
+
+			&:focus {
+				outline: none;
+				border-color: var(--kdm-teal);
+				box-shadow: 0 0 0 2px rgba(0, 201, 167, 0.15);
+			}
+		}
+
+		textarea {
+			resize: vertical;
+			min-height: 80px;
+		}
+	}
+
+	.kdm-lp-form-submit {
+		width: 100%;
+		background: var(--kdm-teal);
+		color: var(--kdm-darker);
+		font-weight: 700;
+		font-size: 15px;
+		font-family: var(--kdm-font-body);
+		padding: 13px;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: opacity 0.2s ease, transform 0.1s ease;
+		text-transform: none;
+		letter-spacing: 0.3px;
+		margin-top: 4px;
+
+		&:hover {
+			opacity: 0.9;
+		}
+
+		&:active {
+			transform: scale(0.98);
+		}
+
+		&:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+		}
+	}
+
+	.kdm-form-status {
+		font-size: 14px;
+		padding: 10px 14px;
+		border-radius: 4px;
+		line-height: 1.5;
+
+		&.kdm-status-success {
+			background: rgba(0, 201, 167, 0.1);
+			border: 1px solid rgba(0, 201, 167, 0.3);
+			color: var(--kdm-teal);
+		}
+
+		&.kdm-status-error {
+			background: rgba(245, 166, 35, 0.1);
+			border: 1px solid rgba(245, 166, 35, 0.3);
+			color: var(--kdm-gold);
+		}
+	}
+
+	.kdm-turnstile-placeholder {
+		background: rgba(255, 255, 255, 0.03);
+		border: 1px dashed var(--kdm-border);
+		border-radius: 4px;
+		padding: 16px;
+		text-align: center;
+		margin: 12px 0;
+		color: var(--kdm-muted);
+		font-size: 13px;
+	}
+
+	@media (max-width: 480px) {
+		&.kdm-lp-form-box {
+			padding: 24px 18px;
+		}
+
+		.kdm-lp-form-row {
+			grid-template-columns: 1fr;
+		}
+	}
+}
+]]></content>
+  </file>
+  <file path="src/editor.scss">
+    <description>Editor-only styles for the form preview in the block editor.</description>
+    <content><![CDATA[
+.wp-block-telex-block-telex-kdm-premium-form {
+	&.kdm-lp-form-box {
+		h3 {
+			[data-rich-text-placeholder] {
+				color: var(--kdm-muted);
+				opacity: 0.5;
+			}
+		}
+
+		.kdm-form-subheading {
+			[data-rich-text-placeholder] {
+				color: var(--kdm-muted);
+				opacity: 0.5;
+			}
+		}
+	}
+
+	.kdm-form-preview {
+		input,
+		textarea {
+			pointer-events: none;
+		}
+
+		label {
+			&[data-rich-text-placeholder]::after,
+			[data-rich-text-placeholder]::after {
+				color: var(--kdm-muted);
+				opacity: 0.5;
+			}
+
+			&:focus-within {
+				outline: none;
+			}
+		}
+	}
+
+	.kdm-lp-form-submit[contenteditable] {
+		cursor: text;
+		pointer-events: auto;
+
+		&:focus {
+			outline: 1px dashed var(--kdm-teal);
+			outline-offset: 2px;
+		}
+	}
+
+	.kdm-lp-form-submit:not([contenteditable]) {
+		pointer-events: none;
+	}
+}
+]]></content>
+  </file>
+  <file path="src/view.js">
+    <description>Front-end JavaScript for AJAX form submission with validation, status messages, and Turnstile integration.</description>
+    <content><![CDATA[
+( function () {
+	'use strict';
+
+	function initForms() {
+		var blocks = document.querySelectorAll(
+			'.wp-block-telex-block-telex-kdm-premium-form'
+		);
+
+		var loadedTimestamp = Math.floor( Date.now() / 1000 );
+
+		blocks.forEach( function ( block ) {
+			var form = block.querySelector( '.kdm-ajax-form' );
+			if ( ! form ) {
+				return;
+			}
+
+			// Set the load timestamp into the hidden field for minimum input delay check.
+			var loadedField = form.querySelector( 'input[name="_kdm_loaded"]' );
+			if ( loadedField ) {
+				loadedField.value = String( loadedTimestamp );
+			}
+
+			form.addEventListener( 'submit', function ( e ) {
+				e.preventDefault();
+				handleSubmit( block, form );
+			} );
+		} );
+	}
+
+	function handleSubmit( block, form ) {
+		var submitBtn = form.querySelector( '.kdm-lp-form-submit' );
+
+		// Prevent double-click: if already submitting, bail out.
+		if ( submitBtn.disabled ) {
+			return;
+		}
+
+		if ( ! submitBtn.getAttribute( 'data-original-label' ) ) {
+			submitBtn.setAttribute( 'data-original-label', submitBtn.innerHTML );
+		}
+		var statusEl = form.querySelector( '.kdm-form-status' );
+		var successMessage =
+			block.getAttribute( 'data-success-message' ) ||
+			'Thank you! Your message has been sent successfully.';
+
+		if ( ! validateForm( form ) ) {
+			showStatus(
+				statusEl,
+				'Please fill in all required fields correctly.',
+				'error'
+			);
+			return;
+		}
+
+		submitBtn.disabled = true;
+		submitBtn.textContent = 'Sending\u2026';
+		hideStatus( statusEl );
+
+		var formData = new FormData( form );
+		formData.append( 'action', 'kdm_form_submit' );
+		formData.append(
+			'nonce',
+			typeof kdmFormData !== 'undefined' ? kdmFormData.nonce : ''
+		);
+
+		var ajaxUrl =
+			typeof kdmFormData !== 'undefined'
+				? kdmFormData.ajaxUrl
+				: '/wp-admin/admin-ajax.php';
+
+		var xhr = new XMLHttpRequest();
+		xhr.open( 'POST', ajaxUrl, true );
+
+		xhr.onload = function () {
+			var response;
+			try {
+				response = JSON.parse( xhr.responseText );
+			} catch ( err ) {
+				showStatus(
+					statusEl,
+					'An unexpected error occurred. Please try again.',
+					'error'
+				);
+				resetButton( submitBtn );
+				return;
+			}
+
+			if ( response.success ) {
+				showStatus(
+					statusEl,
+					response.data.message || successMessage,
+					'success'
+				);
+				form.reset();
+
+				// Re-set the loaded timestamp after reset so subsequent submissions still work.
+				var loadedField = form.querySelector( 'input[name="_kdm_loaded"]' );
+				if ( loadedField ) {
+					loadedField.value = String( Math.floor( Date.now() / 1000 ) );
+				}
+
+				// The submission token is consumed server-side. The user must
+				// refresh the page (or we can fetch a new token) to submit again.
+				// For now, show a message and keep the button disabled briefly.
+				var tokenField = form.querySelector( 'input[name="_kdm_token"]' );
+				if ( tokenField ) {
+					tokenField.value = '';
+				}
+
+				resetTurnstile( form );
+
+				// Re-enable the button after a short delay so user sees feedback.
+				setTimeout( function () {
+					resetButton( submitBtn );
+				}, 2000 );
+			} else {
+				showStatus(
+					statusEl,
+					response.data.message ||
+						'Something went wrong. Please try again.',
+					'error'
+				);
+				resetButton( submitBtn );
+			}
+		};
+
+		xhr.onerror = function () {
+			showStatus(
+				statusEl,
+				'Network error. Please check your connection and try again.',
+				'error'
+			);
+			resetButton( submitBtn );
+		};
+
+		xhr.send( formData );
+	}
+
+	function validateForm( form ) {
+		var firstName = form.querySelector( '[name="first_name"]' );
+		var lastName = form.querySelector( '[name="last_name"]' );
+		var email = form.querySelector( '[name="email"]' );
+		var message = form.querySelector( '[name="message"]' );
+
+		if (
+			! firstName.value.trim() ||
+			! lastName.value.trim() ||
+			! email.value.trim() ||
+			! message.value.trim()
+		) {
+			return false;
+		}
+
+		// Validate email format.
+		var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if ( ! emailPattern.test( email.value.trim() ) ) {
+			return false;
+		}
+
+		// Client-side length checks (mirrors server-side limits).
+		if ( firstName.value.trim().length > 100 ) {
+			return false;
+		}
+		if ( lastName.value.trim().length > 100 ) {
+			return false;
+		}
+		if ( email.value.trim().length > 254 ) {
+			return false;
+		}
+		if ( message.value.trim().length > 5000 ) {
+			return false;
+		}
+
+		var phone = form.querySelector( '[name="phone"]' );
+		if ( phone && phone.value.trim().length > 30 ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	function showStatus( el, message, type ) {
+		if ( ! el ) {
+			return;
+		}
+		el.textContent = message;
+		el.className = 'kdm-form-status';
+		el.classList.add(
+			type === 'success' ? 'kdm-status-success' : 'kdm-status-error'
+		);
+		el.style.display = 'block';
+	}
+
+	function hideStatus( el ) {
+		if ( ! el ) {
+			return;
+		}
+		el.style.display = 'none';
+		el.textContent = '';
+		el.className = 'kdm-form-status';
+	}
+
+	function resetButton( btn ) {
+		btn.disabled = false;
+		btn.innerHTML = btn.getAttribute( 'data-original-label' ) || 'Send Message \u2192';
+	}
+
+	function resetTurnstile( form ) {
+		var turnstileEl = form.querySelector( '.cf-turnstile' );
+		if ( turnstileEl && typeof turnstile !== 'undefined' ) {
+			turnstile.reset( turnstileEl );
+		}
+	}
+
+	if ( document.readyState === 'loading' ) {
+		document.addEventListener( 'DOMContentLoaded', initForms );
+	} else {
+		initForms();
+	}
+} )();
+]]></content>
+  </file>
+  <file path="package.json">
+    <description>Package configuration with project metadata and build scripts.</description>
+    <content><![CDATA[
+{
+	"name": "telex-kdm-premium-form",
+	"version": "0.1.0",
+	"description": "A premium dark-themed contact form block with Cloudflare Turnstile, honeypot, rate limiting, and SMTP support.",
+	"author": "WordPress Telex",
+	"license": "GPL-2.0-or-later",
+	"main": "build/index.js",
+	"scripts": {
+		"build": "wp-scripts build",
+		"format": "wp-scripts format",
+		"lint:css": "wp-scripts lint-style",
+		"lint:js": "wp-scripts lint-js",
+		"packages-update": "wp-scripts packages-update",
+		"plugin-zip": "wp-scripts plugin-zip",
+		"start": "wp-scripts start"
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "^30.15.0"
+	}
+}
+]]></content>
+  </file>
+  <file path="src/typography-panel.js">
+    <content><![CDATA[
+import { __ } from '@wordpress/i18n';
+import { useSelect } from '@wordpress/data';
+import {
+	PanelBody,
+	SelectControl,
+	ComboboxControl,
+	__experimentalUnitControl as UnitControl,
+	FlexBlock,
+	Flex,
+} from '@wordpress/components';
+
+const FONT_WEIGHT_OPTIONS = [
+	{ label: __( 'Default', 'telex-kdm-premium-form' ), value: '' },
+	{ label: '100 — Thin', value: '100' },
+	{ label: '200 — Extra Light', value: '200' },
+	{ label: '300 — Light', value: '300' },
+	{ label: '400 — Normal', value: '400' },
+	{ label: '500 — Medium', value: '500' },
+	{ label: '600 — Semi Bold', value: '600' },
+	{ label: '700 — Bold', value: '700' },
+	{ label: '800 — Extra Bold', value: '800' },
+	{ label: '900 — Black', value: '900' },
+];
+
+const TEXT_TRANSFORM_OPTIONS = [
+	{ label: __( 'Default', 'telex-kdm-premium-form' ), value: '' },
+	{ label: __( 'None', 'telex-kdm-premium-form' ), value: 'none' },
+	{ label: __( 'Uppercase', 'telex-kdm-premium-form' ), value: 'uppercase' },
+	{ label: __( 'Lowercase', 'telex-kdm-premium-form' ), value: 'lowercase' },
+	{ label: __( 'Capitalize', 'telex-kdm-premium-form' ), value: 'capitalize' },
+];
+
+const TEXT_DECORATION_OPTIONS = [
+	{ label: __( 'Default', 'telex-kdm-premium-form' ), value: '' },
+	{ label: __( 'None', 'telex-kdm-premium-form' ), value: 'none' },
+	{ label: __( 'Underline', 'telex-kdm-premium-form' ), value: 'underline' },
+	{ label: __( 'Line Through', 'telex-kdm-premium-form' ), value: 'line-through' },
+];
+
+const TEXT_STYLE_OPTIONS = [
+	{ label: __( 'Default', 'telex-kdm-premium-form' ), value: '' },
+	{ label: __( 'Normal', 'telex-kdm-premium-form' ), value: 'normal' },
+	{ label: __( 'Italic', 'telex-kdm-premium-form' ), value: 'italic' },
+];
+
+/**
+ * System / web-safe font stack fallbacks offered when no theme fonts are found.
+ */
+const SYSTEM_FONT_OPTIONS = [
+	{ value: '', label: __( 'Default', 'telex-kdm-premium-form' ) },
+	{ value: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', label: 'System UI' },
+	{ value: 'serif', label: 'Serif' },
+	{ value: 'sans-serif', label: 'Sans-serif' },
+	{ value: 'monospace', label: 'Monospace' },
+	{ value: 'cursive', label: 'Cursive' },
+];
+
+/**
+ * Hook that retrieves every font family registered in the current WordPress
+ * environment via Global Styles (theme.json typography.fontFamilies) across
+ * default, theme, and custom origins.
+ */
+function useAvailableFonts() {
+	return useSelect( ( select ) => {
+		/*
+		 * The block-editor store exposes settings that include all merged
+		 * typography font families from theme.json (default + theme + custom).
+		 */
+		const settings = select( 'core/block-editor' ).getSettings();
+
+		/*
+		 * __experimentalFeatures holds the fully merged theme.json data
+		 * including fonts installed through the Font Library UI.
+		 */
+		const features = settings?.__experimentalFeatures;
+		const fontFamilies = features?.typography?.fontFamilies;
+
+		if ( ! fontFamilies ) {
+			return [];
+		}
+
+		const collected = [];
+
+		/*
+		 * fontFamilies is keyed by origin: "default", "theme", "custom".
+		 * Each origin contains an array of { fontFamily, name, slug, ... }.
+		 */
+		const origins = [ 'default', 'theme', 'custom' ];
+		origins.forEach( ( origin ) => {
+			const list = fontFamilies[ origin ];
+			if ( Array.isArray( list ) ) {
+				list.forEach( ( entry ) => {
+					if ( entry.fontFamily ) {
+						collected.push( {
+							value: entry.fontFamily,
+							label: entry.name || entry.fontFamily,
+						} );
+					}
+				} );
+			}
+		} );
+
+		return collected;
+	}, [] );
+}
+
+export default function TypographyPanel( { label, value = {}, onChange, initialOpen = false } ) {
+	const themeFonts = useAvailableFonts();
+
+	const fontOptions = themeFonts.length > 0
+		? [ { value: '', label: __( 'Default', 'telex-kdm-premium-form' ) }, ...themeFonts ]
+		: SYSTEM_FONT_OPTIONS;
+
+	const update = ( key, val ) => {
+		onChange( { ...value, [ key ]: val } );
+	};
+
+	return (
+		<PanelBody title={ label } initialOpen={ initialOpen }>
+			<div style={ { marginBottom: '12px' } }>
+				<ComboboxControl
+					label={ __( 'Font Family', 'telex-kdm-premium-form' ) }
+					value={ value.fontFamily || '' }
+					options={ fontOptions }
+					onChange={ ( val ) => update( 'fontFamily', val || '' ) }
+					allowReset={ true }
+				/>
+			</div>
+			<Flex wrap={ true } gap={ 3 } style={ { marginBottom: '12px' } }>
+				<FlexBlock style={ { minWidth: '120px' } }>
+					<UnitControl
+						label={ __( 'Font Size', 'telex-kdm-premium-form' ) }
+						value={ value.fontSize || '' }
+						onChange={ ( val ) => update( 'fontSize', val ) }
+						units={ [
+							{ value: 'px', label: 'px' },
+							{ value: 'em', label: 'em' },
+							{ value: 'rem', label: 'rem' },
+						] }
+					/>
+				</FlexBlock>
+				<FlexBlock style={ { minWidth: '120px' } }>
+					<UnitControl
+						label={ __( 'Line Height', 'telex-kdm-premium-form' ) }
+						value={ value.lineHeight || '' }
+						onChange={ ( val ) => update( 'lineHeight', val ) }
+						units={ [
+							{ value: '', label: '\u2014' },
+							{ value: 'px', label: 'px' },
+							{ value: 'em', label: 'em' },
+						] }
+					/>
+				</FlexBlock>
+			</Flex>
+			<Flex wrap={ true } gap={ 3 } style={ { marginBottom: '12px' } }>
+				<FlexBlock style={ { minWidth: '120px' } }>
+					<UnitControl
+						label={ __( 'Letter Spacing', 'telex-kdm-premium-form' ) }
+						value={ value.letterSpacing || '' }
+						onChange={ ( val ) => update( 'letterSpacing', val ) }
+						units={ [
+							{ value: 'px', label: 'px' },
+							{ value: 'em', label: 'em' },
+						] }
+					/>
+				</FlexBlock>
+				<FlexBlock style={ { minWidth: '120px' } }>
+					<SelectControl
+						label={ __( 'Font Weight', 'telex-kdm-premium-form' ) }
+						value={ value.fontWeight || '' }
+						options={ FONT_WEIGHT_OPTIONS }
+						onChange={ ( val ) => update( 'fontWeight', val ) }
+					/>
+				</FlexBlock>
+			</Flex>
+			<Flex wrap={ true } gap={ 3 } style={ { marginBottom: '12px' } }>
+				<FlexBlock style={ { minWidth: '120px' } }>
+					<SelectControl
+						label={ __( 'Text Transform', 'telex-kdm-premium-form' ) }
+						value={ value.textTransform || '' }
+						options={ TEXT_TRANSFORM_OPTIONS }
+						onChange={ ( val ) => update( 'textTransform', val ) }
+					/>
+				</FlexBlock>
+				<FlexBlock style={ { minWidth: '120px' } }>
+					<SelectControl
+						label={ __( 'Text Decoration', 'telex-kdm-premium-form' ) }
+						value={ value.textDecoration || '' }
+						options={ TEXT_DECORATION_OPTIONS }
+						onChange={ ( val ) => update( 'textDecoration', val ) }
+					/>
+				</FlexBlock>
+			</Flex>
+			<SelectControl
+				label={ __( 'Font Style', 'telex-kdm-premium-form' ) }
+				value={ value.fontStyle || '' }
+				options={ TEXT_STYLE_OPTIONS }
+				onChange={ ( val ) => update( 'fontStyle', val ) }
+			/>
+		</PanelBody>
+	);
+}
+
+export function typographyToStyle( typo = {} ) {
+	const style = {};
+	if ( typo.fontFamily ) style.fontFamily = typo.fontFamily;
+	if ( typo.fontSize ) style.fontSize = typo.fontSize;
+	if ( typo.fontWeight ) style.fontWeight = typo.fontWeight;
+	if ( typo.fontStyle ) style.fontStyle = typo.fontStyle;
+	if ( typo.lineHeight ) style.lineHeight = typo.lineHeight;
+	if ( typo.letterSpacing ) style.letterSpacing = typo.letterSpacing;
+	if ( typo.textTransform ) style.textTransform = typo.textTransform;
+	if ( typo.textDecoration ) style.textDecoration = typo.textDecoration;
+	return style;
+}
+]]></content>
+  </file>
+</artefact>

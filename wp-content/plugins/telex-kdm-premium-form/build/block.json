@@ -1,0 +1,160 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "telex/block-telex-kdm-premium-form",
+  "version": "0.1.0",
+  "title": "KDM Premium Vibrant Form",
+  "category": "widgets",
+  "icon": "email",
+  "description": "A premium dark-themed contact form with Cloudflare Turnstile, honeypot, rate limiting, and SMTP support.",
+  "example": {
+    "attributes": {
+      "layoutType": "compact",
+      "heading": "Speak with a Local SEO Expert",
+      "subheading": "Fill out the form and we will get back to you within 24 hours.",
+      "notificationEmail": "admin@example.com",
+      "successMessage": "Thank you! Your message has been sent successfully."
+    }
+  },
+  "attributes": {
+    "formInstanceId": {
+      "type": "string",
+      "default": ""
+    },
+    "layoutType": {
+      "type": "string",
+      "default": "compact"
+    },
+    "heading": {
+      "type": "string",
+      "default": "Speak with a Local SEO Expert"
+    },
+    "subheading": {
+      "type": "string",
+      "default": "Fill out the form and we will get back to you within 24 hours."
+    },
+    "notificationEmail": {
+      "type": "string",
+      "default": ""
+    },
+    "successMessage": {
+      "type": "string",
+      "default": "Thank you! Your message has been sent successfully."
+    },
+    "labelFirstName": {
+      "type": "string",
+      "default": "First Name"
+    },
+    "labelLastName": {
+      "type": "string",
+      "default": "Last Name"
+    },
+    "labelEmail": {
+      "type": "string",
+      "default": "Email"
+    },
+    "labelPhone": {
+      "type": "string",
+      "default": "Phone"
+    },
+    "labelMessage": {
+      "type": "string",
+      "default": "Message"
+    },
+    "placeholderFirstName": {
+      "type": "string",
+      "default": "John"
+    },
+    "placeholderLastName": {
+      "type": "string",
+      "default": "Doe"
+    },
+    "placeholderEmail": {
+      "type": "string",
+      "default": "john@example.com"
+    },
+    "placeholderPhone": {
+      "type": "string",
+      "default": "+1 555 123 4567"
+    },
+    "placeholderMessage": {
+      "type": "string",
+      "default": "Your message…"
+    },
+    "buttonText": {
+      "type": "string",
+      "default": "Send Message →"
+    },
+    "headingTypography": {
+      "type": "object",
+      "default": {}
+    },
+    "subheadingTypography": {
+      "type": "object",
+      "default": {}
+    },
+    "labelFirstNameTypography": {
+      "type": "object",
+      "default": {}
+    },
+    "labelLastNameTypography": {
+      "type": "object",
+      "default": {}
+    },
+    "labelEmailTypography": {
+      "type": "object",
+      "default": {}
+    },
+    "labelPhoneTypography": {
+      "type": "object",
+      "default": {}
+    },
+    "labelMessageTypography": {
+      "type": "object",
+      "default": {}
+    },
+    "inputFirstNameTypography": {
+      "type": "object",
+      "default": {}
+    },
+    "inputLastNameTypography": {
+      "type": "object",
+      "default": {}
+    },
+    "inputEmailTypography": {
+      "type": "object",
+      "default": {}
+    },
+    "inputPhoneTypography": {
+      "type": "object",
+      "default": {}
+    },
+    "inputMessageTypography": {
+      "type": "object",
+      "default": {}
+    },
+    "buttonTypography": {
+      "type": "object",
+      "default": {}
+    }
+  },
+  "supports": {
+    "html": false,
+    "anchor": true,
+    "spacing": {
+      "margin": true,
+      "padding": true
+    },
+    "color": {
+      "background": true,
+      "text": true,
+      "gradients": true
+    }
+  },
+  "textdomain": "telex-kdm-premium-form",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "viewScript": "file:./view.js",
+  "render": "file:./render.php"
+}

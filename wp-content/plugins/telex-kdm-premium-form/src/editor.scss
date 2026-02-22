@@ -1,0 +1,51 @@
+
+.wp-block-telex-block-telex-kdm-premium-form {
+	&.kdm-lp-form-box {
+		h3 {
+			[data-rich-text-placeholder] {
+				color: var(--kdm-muted);
+				opacity: 0.5;
+			}
+		}
+
+		.kdm-form-subheading {
+			[data-rich-text-placeholder] {
+				color: var(--kdm-muted);
+				opacity: 0.5;
+			}
+		}
+	}
+
+	.kdm-form-preview {
+		input,
+		textarea {
+			pointer-events: none;
+		}
+
+		label {
+			&[data-rich-text-placeholder]::after,
+			[data-rich-text-placeholder]::after {
+				color: var(--kdm-muted);
+				opacity: 0.5;
+			}
+
+			&:focus-within {
+				outline: none;
+			}
+		}
+	}
+
+	.kdm-lp-form-submit[contenteditable] {
+		cursor: text;
+		pointer-events: auto;
+
+		&:focus {
+			outline: 1px dashed var(--kdm-teal);
+			outline-offset: 2px;
+		}
+	}
+
+	.kdm-lp-form-submit:not([contenteditable]) {
+		pointer-events: none;
+	}
+}

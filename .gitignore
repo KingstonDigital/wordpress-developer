@@ -24,8 +24,12 @@ wp-signup.php
 wp-trackback.php
 xmlrpc.php
 
-# Keep our custom plugin
+# Keep our custom entries
 !/wp-content/plugins/kdm-landing-blocks/
+!/wp-content/themes/twentytwentyfive-child/
+!/local-seo-toronto-blocks.html
+!/minify.py
+!/convert.py
 
 # Docker and OS
 .database_data/
