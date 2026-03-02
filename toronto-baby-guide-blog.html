@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — Toronto Baby Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blush: #f5e8e2;
+    --rose: #c97b6b;
+    --rose-dark: #a05c4e;
+    --charcoal: #2d2926;
+    --warm-gray: #7a726d;
+    --cream: #faf7f4;
+    --white: #ffffff;
+    --border: #ede5e0;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--charcoal);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* NAV */
+  nav {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+  }
+  .logo {
+    text-align: center;
+    text-decoration: none;
+  }
+  .logo-sub { font-size: 0.65rem; letter-spacing: 0.25em; color: var(--warm-gray); text-transform: uppercase; }
+  .logo-main { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: var(--charcoal); display: block; line-height: 1; }
+  .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+  .nav-links a { text-decoration: none; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--warm-gray); font-weight: 500; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--rose); }
+  .btn-ebook {
+    background: var(--rose);
+    color: var(--white) !important;
+    padding: 0.5rem 1.1rem;
+    border-radius: 2rem;
+    font-size: 0.78rem !important;
+    letter-spacing: 0.06em;
+    transition: background 0.2s !important;
+  }
+  .btn-ebook:hover { background: var(--rose-dark) !important; }
+
+  /* PAGE HEADER */
+  .page-header {
+    background: var(--blush);
+    padding: 4rem 2rem 3rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .page-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 120%, rgba(201,123,107,0.12), transparent);
+  }
+  .page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 5vw, 3.5rem);
+    font-weight: 700;
+    color: var(--charcoal);
+    position: relative;
+  }
+  .page-header p {
+    color: var(--warm-gray);
+    margin-top: 0.75rem;
+    font-size: 1rem;
+    font-weight: 300;
+    position: relative;
+  }
+
+  /* FILTER TABS */
+  .filters {
+    max-width: 1180px;
+    margin: 2.5rem auto 0;
+    padding: 0 2rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 0.45rem 1.1rem;
+    border-radius: 2rem;
+    font-size: 0.8rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    color: var(--warm-gray);
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--rose);
+    border-color: var(--rose);
+    color: var(--white);
+  }
+
+  /* MAIN LAYOUT */
+  .main {
+    max-width: 1180px;
+    margin: 2.5rem auto 4rem;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  /* FEATURED POST */
+  .featured {
+    background: var(--white);
+    border-radius: 1.5rem;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 340px;
+    box-shadow: 0 4px 24px rgba(45,41,38,0.06);
+    animation: fadeUp 0.6s ease both;
+  }
+  .featured-img {
+    background: linear-gradient(135deg, #e8c5bb 0%, #c4947e 100%);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .featured-img img { width: 100%; height: 100%; object-fit: cover; }
+  .featured-img-placeholder {
+    width: 100%; height: 100%; min-height: 300px;
+    background: linear-gradient(135deg, #f0d5cb 0%, #d4a090 50%, #b87060 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .featured-img-placeholder svg { opacity: 0.3; }
+  .featured-body {
+    padding: 2.5rem 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--rose);
+    margin-bottom: 0.9rem;
+  }
+  .featured-body h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.75rem;
+    line-height: 1.3;
+    font-weight: 700;
+    color: var(--charcoal);
+    margin-bottom: 1rem;
+  }
+  .featured-body p {
+    color: var(--warm-gray);
+    font-size: 0.93rem;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+  .btn-read {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--rose);
+    color: var(--white);
+    padding: 0.6rem 1.4rem;
+    border-radius: 2rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    text-decoration: none;
+    width: fit-content;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .btn-read:hover { background: var(--rose-dark); transform: translateY(-1px); }
+  .meta { font-size: 0.78rem; color: var(--warm-gray); margin-top: 1.2rem; }
+
+  /* GRID */
+  .posts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: 1.2rem;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: transform 0.25s, box-shadow 0.25s;
+    animation: fadeUp 0.6s ease both;
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(45,41,38,0.1); }
+
+  .card-img {
+    aspect-ratio: 16/9;
+    overflow: hidden;
+  }
+  .card-img-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card-img-placeholder.c1 { background: linear-gradient(135deg, #f0d5cb, #c4947e); }
+  .card-img-placeholder.c2 { background: linear-gradient(135deg, #d8e8d5, #8fb88a); }
+  .card-img-placeholder.c3 { background: linear-gradient(135deg, #d5e0f0, #8a9fc4); }
+  .card-img-placeholder.c4 { background: linear-gradient(135deg, #f0ebd5, #c4b47e); }
+  .card-img-placeholder.c5 { background: linear-gradient(135deg, #ead5f0, #b48ac4); }
+  .card-img-placeholder.c6 { background: linear-gradient(135deg, #d5f0ea, #7ec4b4); }
+  .card-img-placeholder.c7 { background: linear-gradient(135deg, #f0d5d5, #c47e8a); }
+  .card-img-placeholder.c8 { background: linear-gradient(135deg, #f5ead5, #c4a87e); }
+
+  .card-body { padding: 1.3rem 1.4rem 1.5rem; }
+  .card-body .tag { margin-bottom: 0.5rem; }
+  .card-body h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--charcoal);
+    margin-bottom: 0.5rem;
+  }
+  .card-body p {
+    font-size: 0.85rem;
+    color: var(--warm-gray);
+    line-height: 1.6;
+    margin-bottom: 0.9rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--border);
+    padding-top: 0.8rem;
+    margin-top: 0.5rem;
+  }
+  .card-footer .date { font-size: 0.75rem; color: var(--warm-gray); }
+  .card-footer .read-link {
+    font-size: 0.78rem;
+    color: var(--rose);
+    font-weight: 500;
+    text-decoration: none;
+    display: flex; align-items: center; gap: 0.25rem;
+  }
+  .card-footer .read-link:hover { text-decoration: underline; }
+
+  /* PAGINATION */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 3rem;
+  }
+  .pag-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem;
+    color: var(--charcoal);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .pag-btn:hover, .pag-btn.active {
+    background: var(--rose);
+    border-color: var(--rose);
+    color: var(--white);
+  }
+
+  /* SIDEBAR */
+  .sidebar { display: flex; flex-direction: column; gap: 2rem; }
+
+  .sidebar-widget {
+    background: var(--white);
+    border-radius: 1.2rem;
+    padding: 1.6rem;
+    border: 1px solid var(--border);
+    animation: fadeUp 0.6s ease 0.2s both;
+  }
+  .widget-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 2px solid var(--blush);
+  }
+
+  /* Newsletter widget */
+  .newsletter-widget { background: var(--blush); border-color: transparent; }
+  .newsletter-widget p {
+    font-size: 0.85rem;
+    color: var(--warm-gray);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+  .newsletter-form { display: flex; flex-direction: column; gap: 0.6rem; }
+  .newsletter-form input {
+    padding: 0.65rem 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: 0.6rem;
+    font-size: 0.85rem;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .newsletter-form input:focus { border-color: var(--rose); }
+  .newsletter-form button {
+    padding: 0.65rem;
+    background: var(--rose);
+    color: var(--white);
+    border: none;
+    border-radius: 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .newsletter-form button:hover { background: var(--rose-dark); }
+
+  /* Popular guides */
+  .guide-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .guide-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .guide-item:hover { opacity: 0.75; }
+  .guide-thumb {
+    width: 48px; height: 48px;
+    border-radius: 0.5rem;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .guide-thumb.g1 { background: linear-gradient(135deg, #f0d5cb, #c4947e); }
+  .guide-thumb.g2 { background: linear-gradient(135deg, #d8e8d5, #8fb88a); }
+  .guide-thumb.g3 { background: linear-gradient(135deg, #d5e0f0, #8a9fc4); }
+  .guide-info { flex: 1; }
+  .guide-info h4 {
+    font-size: 0.83rem;
+    font-weight: 500;
+    color: var(--charcoal);
+    line-height: 1.4;
+  }
+  .guide-info span { font-size: 0.73rem; color: var(--warm-gray); }
+
+  /* Topics */
+  .topics-cloud { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .topic-tag {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 2rem;
+    border: 1.5px solid var(--border);
+    color: var(--warm-gray);
+    background: var(--cream);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 400;
+  }
+  .topic-tag:hover { background: var(--rose); border-color: var(--rose); color: var(--white); }
+
+  /* FOOTER */
+  footer {
+    background: var(--charcoal);
+    color: rgba(255,255,255,0.65);
+    padding: 3.5rem 2rem 2rem;
+  }
+  .footer-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.5fr repeat(4, 1fr);
+    gap: 2.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .footer-brand .logo-main { color: var(--white); font-size: 1.5rem; }
+  .footer-brand p { font-size: 0.82rem; line-height: 1.7; margin-top: 0.8rem; }
+  .footer-socials { display: flex; gap: 0.6rem; margin-top: 1rem; }
+  .footer-socials a {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+  }
+  .footer-socials a:hover { border-color: var(--rose); color: var(--rose); }
+  .footer-col h5 { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white); margin-bottom: 1rem; }
+  .footer-col ul { list-style: none; }
+  .footer-col li { margin-bottom: 0.5rem; }
+  .footer-col a { font-size: 0.82rem; color: rgba(255,255,255,0.55); text-decoration: none; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--rose); }
+  .footer-bottom {
+    max-width: 1180px;
+    margin: 1.5rem auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.35);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card:nth-child(1) { animation-delay: 0.05s; }
+  .card:nth-child(2) { animation-delay: 0.1s; }
+  .card:nth-child(3) { animation-delay: 0.15s; }
+  .card:nth-child(4) { animation-delay: 0.2s; }
+  .card:nth-child(5) { animation-delay: 0.25s; }
+  .card:nth-child(6) { animation-delay: 0.3s; }
+  .card:nth-child(7) { animation-delay: 0.35s; }
+  .card:nth-child(8) { animation-delay: 0.4s; }
+
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+    .featured { grid-template-columns: 1fr; }
+    .featured-img { min-height: 220px; }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+  }
+  @media (max-width: 600px) {
+    .posts-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <ul class="nav-links">
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Start Here</a></li>
+    </ul>
+    <a href="#" class="logo">
+      <span class="logo-sub">✦ Toronto ✦</span>
+      <span class="logo-main">Baby Guide</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#">Blog</a></li>
+      <li><a href="#">Free Stuff</a></li>
+      <li><a href="#">Newsletter</a></li>
+      <li><a href="#" class="btn-ebook">Buy the eBook</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <h1>The Blog</h1>
+  <p>Guides, tips & resources for Toronto parents — from bump to beyond.</p>
+</div>
+
+<!-- FILTERS -->
+<div class="filters">
+  <button class="filter-btn active">All Posts</button>
+  <button class="filter-btn">Maternity Benefits</button>
+  <button class="filter-btn">Childcare</button>
+  <button class="filter-btn">Parenting Tips</button>
+  <button class="filter-btn">Local Events</button>
+  <button class="filter-btn">Baby Gear</button>
+  <button class="filter-btn">Toronto Resources</button>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <div class="content">
+
+    <!-- FEATURED -->
+    <div class="featured">
+      <div class="featured-img">
+        <div class="featured-img-placeholder">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <circle cx="40" cy="35" r="18" stroke="white" stroke-width="2"/>
+            <path d="M22 65 Q40 50 58 65" stroke="white" stroke-width="2" fill="none"/>
+            <circle cx="40" cy="28" r="6" fill="white" opacity="0.5"/>
+          </svg>
+        </div>
+      </div>
+      <div class="featured-body">
+        <span class="tag">✦ Featured</span>
+        <h2>EI Maternity Benefits 2026: New Rates & Maximums in Ontario</h2>
+        <p>A clear breakdown of EI maternity benefit changes for 2026 — including new rates, income limits, and key dates for Ontario parents planning their leave.</p>
+        <a href="#" class="btn-read">Read More →</a>
+        <div class="meta">February 18, 2026 &nbsp;·&nbsp; 8 min read</div>
+      </div>
+    </div>
+
+    <!-- POSTS GRID -->
+    <div class="posts-grid">
+
+      <div class="card">
+        <div class="card-img"><div class="card-img-placeholder c1"></div></div>
+        <div class="card-body">
+          <span class="tag">Childcare</span>
+          <h3>Ontario Extends $10-a-Day Child Care Plan to End of 2026</h3>
+          <p>What Toronto parents need to know about the new CWELCC agreement and how it keeps fees affordable.</p>
+          <div class="card-footer">
+            <span class="date">Feb 12, 2026</span>
+            <a href="#" class="read-link">Read →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-img"><div class="card-img-placeholder c2"></div></div>
+        <div class="card-body">
+          <span class="tag">Parenting Tips</span>
+          <h3>Maternity & Parental Leave Job Protection in Ontario Explained</h3>
+          <p>A parent-friendly guide to maternity and parental leave rights — from job protection to benefits.</p>
+          <div class="card-footer">
+            <span class="date">Feb 7, 2026</span>
+            <a href="#" class="read-link">Read →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-img"><div class="card-img-placeholder c3"></div></div>
+        <div class="card-body">
+          <span class="tag">Childcare</span>
+          <h3>How to Look Up Daycare Violations in Ontario</h3>
+          <p>Ontario parents can look up daycare violations using a public registry — here's how to use it.</p>
+          <div class="card-footer">
+            <span class="date">Feb 3, 2026</span>
+            <a href="#" class="read-link">Read →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-img"><div class="card-img-placeholder c4"></div></div>
+        <div class="card-body">
+          <span class="tag">Maternity Benefits</span>
+          <h3>What Maternity Leave Really Looks Like Around the World</h3>
+          <p>Maternity leave can feel confusing even in Canada — here's what Toronto parents can learn from global policies.</p>
+          <div class="card-footer">
+            <span class="date">Jan 31, 2026</span>
+            <a href="#" class="read-link">Read →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-img"><div class="card-img-placeholder c5"></div></div>
+        <div class="card-body">
+          <span class="tag">Local Events</span>
+          <h3>December in Toronto: Baby-Friendly Winter Events for Parents</h3>
+          <p>From sparkling lights to stroller strolls — your roundup of the best baby-friendly December events.</p>
+          <div class="card-footer">
+            <span class="date">Jan 22, 2026</span>
+            <a href="#" class="read-link">Read →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-img"><div class="card-img-placeholder c6"></div></div>
+        <div class="card-body">
+          <span class="tag">Toronto Resources</span>
+          <h3>The BEST EarlyON Centres in Toronto for Free Baby Drop-In Play</h3>
+          <p>Find the top-rated CaféON Child & Family Centres across Toronto neighbourhoods.</p>
+          <div class="card-footer">
+            <span class="date">Jan 18, 2026</span>
+            <a href="#" class="read-link">Read →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-img"><div class="card-img-placeholder c7"></div></div>
+        <div class="card-body">
+          <span class="tag">Baby Gear</span>
+          <h3>The Ultimate Holiday Gift Guide for New & Expecting GTA Parents</h3>
+          <p>Finding the perfect gift for the GTA's new and expecting parents this season — our top picks.</p>
+          <div class="card-footer">
+            <span class="date">Dec 5, 2025</span>
+            <a href="#" class="read-link">Read →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-img"><div class="card-img-placeholder c8"></div></div>
+        <div class="card-body">
+          <span class="tag">Local Events</span>
+          <h3>2025 Hamilton Baby Expo: Must-See Parenting Event Roundup</h3>
+          <p>Toronto Baby Guide will be attending the 2025 Hamilton Baby Expo — here's everything to know before you go.</p>
+          <div class="card-footer">
+            <span class="date">Oct 28, 2025</span>
+            <a href="#" class="read-link">Read →</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination">
+      <button class="pag-btn">‹</button>
+      <button class="pag-btn active">1</button>
+      <button class="pag-btn">2</button>
+      <button class="pag-btn">3</button>
+      <span style="color:var(--warm-gray);font-size:0.85rem;padding:0 0.25rem">…</span>
+      <button class="pag-btn">8</button>
+      <button class="pag-btn">›</button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- Newsletter -->
+    <div class="sidebar-widget newsletter-widget">
+      <div class="widget-title">Join Our Newsletter</div>
+      <p>Get the latest Toronto parenting news, guides, and event roundups delivered to your inbox.</p>
+      <div class="newsletter-form">
+        <input type="text" placeholder="Your first name">
+        <input type="email" placeholder="Email address">
+        <button>Sign Up →</button>
+      </div>
+    </div>
+
+    <!-- Popular Guides -->
+    <div class="sidebar-widget">
+      <div class="widget-title">Popular Guides</div>
+      <a href="#" class="guide-item">
+        <div class="guide-thumb g1"></div>
+        <div class="guide-info">
+          <h4>EI Maternity Benefits 2026: Complete Guide</h4>
+          <span>Maternity Benefits</span>
+        </div>
+      </a>
+      <a href="#" class="guide-item">
+        <div class="guide-thumb g2"></div>
+        <div class="guide-info">
+          <h4>How to Start Looking for Childcare in Toronto</h4>
+          <span>Childcare</span>
+        </div>
+      </a>
+      <a href="#" class="guide-item">
+        <div class="guide-thumb g3"></div>
+        <div class="guide-info">
+          <h4>Top 10 Maternity & Baby Gear Essentials</h4>
+          <span>Baby Gear</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Topics -->
+    <div class="sidebar-widget">
+      <div class="widget-title">Browse Topics</div>
+      <div class="topics-cloud">
+        <span class="topic-tag">Maternity Benefits</span>
+        <span class="topic-tag">Childcare</span>
+        <span class="topic-tag">Parenting Tips</span>
+        <span class="topic-tag">Local Events</span>
+        <span class="topic-tag">Baby Gear</span>
+        <span class="topic-tag">Pregnancy</span>
+        <span class="topic-tag">Newborn</span>
+        <span class="topic-tag">Toronto</span>
+        <span class="topic-tag">Ontario EI</span>
+        <span class="topic-tag">EarlyON</span>
+        <span class="topic-tag">Family Finance</span>
+        <span class="topic-tag">Mental Health</span>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="sidebar-widget">
+      <div class="widget-title">About Toronto Baby Guide</div>
+      <p style="font-size:0.85rem;color:var(--warm-gray);line-height:1.7;">We're a local resource helping Toronto and GTA parents navigate pregnancy, parenting, childcare, and everything in between — from EI benefits to the best EarlyON drop-ins.</p>
+      <a href="#" style="display:inline-block;margin-top:1rem;font-size:0.82rem;color:var(--rose);font-weight:500;text-decoration:none;">Learn more →</a>
+    </div>
+
+  </aside>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="logo-main">Toronto Baby Guide</span>
+      <p>Your local guide to having and raising a baby in Toronto — practical, honest, and always parent-first.</p>
+      <div class="footer-socials">
+        <a href="#">f</a>
+        <a href="#">in</a>
+        <a href="#">ig</a>
+        <a href="#">▶</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h5>Navigate</h5>
+      <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Start Here</a></li>
+        <li><a href="#">Newsletter</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Popular</h5>
+      <ul>
+        <li><a href="#">Maternity Benefits</a></li>
+        <li><a href="#">Childcare Guide</a></li>
+        <li><a href="#">Baby eBook</a></li>
+        <li><a href="#">Free Stuff</a></li>
+        <li><a href="#">Toronto Guide</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Helpful Guides</h5>
+      <ul>
+        <li><a href="#">Pregnancy Guide</a></li>
+        <li><a href="#">Baby's First Year</a></li>
+        <li><a href="#">Local Resources</a></li>
+        <li><a href="#">Maternity Leave Guide</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Legal</h5>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Medical Disclaimer</a></li>
+        <li><a href="#">Terms & Conditions</a></li>
+        <li><a href="#">Refund Policy</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Toronto Baby Guide. All rights reserved.</span>
+    <span>Made with ♥ for Toronto parents</span>
+  </div>
+</footer>
+
+<script>
+  // Filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
