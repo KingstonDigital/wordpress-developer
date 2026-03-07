@@ -29,11 +29,13 @@ add_action('wp_enqueue_scripts', 'child_enqueue_styles', 15);
 /**
  * Enqueue SEO Landing Page specific styles
  */
+/**
+ * Enqueue SEO Landing Page specific styles
+ */
 function kdm_enqueue_seo_landing_page_styles()
 {
-    // Only load the landing page styles if we are on the 'local-seo' page
+    // Local SEO page
     if (is_page('local-seo')) {
-        // Enqueue the landing page stylesheet (minified for non-logged-in users)
         $css_file = (!is_user_logged_in() && file_exists(get_stylesheet_directory() . '/css/seo-landing-page.min.css'))
             ? '/css/seo-landing-page.min.css'
             : '/css/seo-landing-page.css';
@@ -44,8 +46,66 @@ function kdm_enqueue_seo_landing_page_styles()
             array('twentytwentyfive-parent-style', 'kingston-digital-custom-css'),
             filemtime(get_stylesheet_directory() . $css_file)
         );
+    }
 
-        // Google Fonts for SEO Landing Page
+    // Technical SEO Toronto page
+    if (is_page('technical-seo-toronto')) {
+        $css_file = (!is_user_logged_in() && file_exists(get_stylesheet_directory() . '/css/technical-seo-toronto.min.css'))
+            ? '/css/technical-seo-toronto.min.css'
+            : '/css/technical-seo-toronto.css';
+
+        wp_enqueue_style(
+            'kdm-technical-seo-style',
+            get_stylesheet_directory_uri() . $css_file,
+            array('twentytwentyfive-parent-style', 'kingston-digital-custom-css'),
+            filemtime(get_stylesheet_directory() . $css_file)
+        );
+    }
+
+    // On-Page SEO Toronto page
+    if (is_page('on-page-seo-toronto')) {
+        $css_file = (!is_user_logged_in() && file_exists(get_stylesheet_directory() . '/css/on-page-seo-toronto.min.css'))
+            ? '/css/on-page-seo-toronto.min.css'
+            : '/css/on-page-seo-toronto.css';
+
+        wp_enqueue_style(
+            'kdm-on-page-seo-style',
+            get_stylesheet_directory_uri() . $css_file,
+            array('twentytwentyfive-parent-style', 'kingston-digital-custom-css'),
+            file_exists(get_stylesheet_directory() . $css_file) ? filemtime(get_stylesheet_directory() . $css_file) : CHILD_THEME_KINGSTON_DIGITAL
+        );
+    }
+
+    // SEO Content Writing Toronto page
+    if (is_page('seo-content-writing-toronto')) {
+        $css_file = (!is_user_logged_in() && file_exists(get_stylesheet_directory() . '/css/seo-content-writing-toronto.min.css'))
+            ? '/css/seo-content-writing-toronto.min.css'
+            : '/css/seo-content-writing-toronto.css';
+
+        wp_enqueue_style(
+            'kdm-seo-content-writing-style',
+            get_stylesheet_directory_uri() . $css_file,
+            array('twentytwentyfive-parent-style', 'kingston-digital-custom-css'),
+            file_exists(get_stylesheet_directory() . $css_file) ? filemtime(get_stylesheet_directory() . $css_file) : CHILD_THEME_KINGSTON_DIGITAL
+        );
+    }
+
+    // Link Building Toronto page
+    if (is_page('link-building-toronto')) {
+        $css_file = (!is_user_logged_in() && file_exists(get_stylesheet_directory() . '/css/link-building-toronto.min.css'))
+            ? '/css/link-building-toronto.min.css'
+            : '/css/link-building-toronto.css';
+
+        wp_enqueue_style(
+            'kdm-link-building-style',
+            get_stylesheet_directory_uri() . $css_file,
+            array('twentytwentyfive-parent-style', 'kingston-digital-custom-css'),
+            file_exists(get_stylesheet_directory() . $css_file) ? filemtime(get_stylesheet_directory() . $css_file) : CHILD_THEME_KINGSTON_DIGITAL
+        );
+    }
+
+    // Common Google Fonts for all landing pages
+    if (is_page(array('local-seo', 'technical-seo-toronto', 'on-page-seo-toronto', 'seo-content-writing-toronto', 'link-building-toronto'))) {
         wp_enqueue_style(
             'kdm-google-fonts',
             'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap',
@@ -106,9 +166,17 @@ function add_block_styles()
 
     // Toronto Baby Guide styles
     add_editor_style('/css/toronto-baby-guide.css');
+
+    // On-Page SEO Toronto styles
+    add_editor_style('/css/on-page-seo-toronto.css');
+
+    // SEO Content Writing Toronto styles
+    add_editor_style('/css/seo-content-writing-toronto.css');
+
+    // Link Building Toronto styles
+    add_editor_style('/css/link-building-toronto.css');
 }
 add_action('after_setup_theme', 'add_block_styles');
-
 
 // Add custom styles to wordpress core blocks 
 function enqueue_custom_block_styles()
